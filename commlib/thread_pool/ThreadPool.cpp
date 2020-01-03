@@ -74,7 +74,6 @@ void CWSLib::ThreadPool::work()
                 });
             if (!this->mContinue)
             {
-                std::unique_lock<std::mutex> ulock(mMutex);
                 std::cout << std::this_thread::get_id() << " quit\n";
                 mCurrentThdSize--;
                 std::cout << "thread size:" << mCurrentThdSize << "\n";
