@@ -10,7 +10,7 @@ void CWSLib::ThreadPool::init(int initThreadNum, int maxTaskNum, int maxThreadNu
     mThreadLimit = maxThreadNum;
     mTaskLimit = maxTaskNum;
 
-    // ³õÊ¼»¯¹¤×÷Ïß³Ì
+    // åˆå§‹åŒ–å·¥ä½œçº¿ç¨‹
     for (int i = 0; i < initThreadNum; ++i)
     {
         std::thread thd([&]() {
@@ -27,7 +27,7 @@ void CWSLib::ThreadPool::addTask(BaseTask* task)
         return;
     }
 
-    // ¿´ÈÎÎñ¶ÓÁĞÊÇ·ñÒÑ´ïãĞÖµÒÔ¼°Ïß³ÌÊÇ·ñÒÑ´ïÉÏÏŞ
+    // çœ‹ä»»åŠ¡é˜Ÿåˆ—æ˜¯å¦å·²è¾¾é˜ˆå€¼ä»¥åŠçº¿ç¨‹æ˜¯å¦å·²è¾¾ä¸Šé™
     std::unique_lock<std::mutex> ulock(mMutex);
     if (mTasks.size() < mTaskLimit)
     {
@@ -74,6 +74,10 @@ void CWSLib::ThreadPool::work()
                 });
             if (!this->mContinue)
             {
+                std::unique_lock<std::mutex> ulock(mMutex);
+                std::cout << std::this_thread::get_id() << " quit\n";
+                mCurrentThdSize--;
+                std::cout << "thread size:" << mCurrentThdSize << "\n";
                 return;
             }
 
@@ -82,14 +86,14 @@ void CWSLib::ThreadPool::work()
 
         }
 
-        // µ±ÈÎÎñ¶ÓÁĞ¼õÉÙÊ±£¬»½ĞÑÈÎÎñ¶ÓÁĞ
+        // å½“ä»»åŠ¡é˜Ÿåˆ—å‡å°‘æ—¶ï¼Œå”¤é†’ä»»åŠ¡é˜Ÿåˆ—
         if (mTasks.size() < mTaskLimit)
         {
             mPushCond.notify_one();
         }
         task->excute();
 
-        // ¸ù¾İÊµÊ±µÄÈÎÎñÇé¿ö£¬ÊÊµ±¼õÉÙµ±Ç°ÔËĞĞµÄÏß³Ì
+        // æ ¹æ®å®æ—¶çš„ä»»åŠ¡æƒ…å†µï¼Œé€‚å½“å‡å°‘å½“å‰è¿è¡Œçš„çº¿ç¨‹
         if (mTasks.size() < mTaskLimit / 2 && mCurrentThdSize > mInitThdnum)
         {
             std::unique_lock<std::mutex> ulock(mMutex);
