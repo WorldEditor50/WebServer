@@ -6,6 +6,7 @@
 int main(int argc, char** argv)
 {
     //CWSTest::helloWorld();
-    CWSTest::threadPool();
+    //CWSTest::threadPool();
+    CWSTest::log();
     return 0;
 }

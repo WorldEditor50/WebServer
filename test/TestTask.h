@@ -17,9 +17,8 @@ public:
     virtual void excute()
     {
         srand((unsigned int)time(NULL));
-        std::this_thread::sleep_for(std::chrono::milliseconds(rand() % 1000));
+        std::this_thread::sleep_for(std::chrono::milliseconds(rand() % 300));
         std::cout << std::this_thread::get_id() << ": Haha\n";
-        std::this_thread::sleep_for(std::chrono::seconds(2));
     }
 
 private:

@@ -7,6 +7,7 @@ namespace CWSTest
 {
     void helloWorld();
     void threadPool();
+    void log();
 }
 
 #endif // !__TEST_H__
