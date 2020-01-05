@@ -34,6 +34,7 @@ void CWSTest::log()
     int num = 10086;
     const char* lala = "aa10086";
     char c = 'c';
+    SET_LOG_FILE("test_log.log");
     BASIC_LOG(CWSLib::LogLevel::DEBUG, "hahaha[][][]");
     BASIC_LOG(CWSLib::LogLevel::DEBUG, "hahaha[%d][%s][%c]", num, lala, c);
     DEBUG_LOG("hahaha[%d][%s][%c]", num, lala, c);
