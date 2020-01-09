@@ -48,11 +48,5 @@ typedef CWSLib::CommSingleton<CWSLib::Logger> CWSLogger;
     level, std::move(CWSLib::String::format(fmt, ##__VA_ARGS__))); }while(0)
 #define SET_LOG_FILE(fileName) do { CWSLogger::instance().setFile(fileName); } while(0)
 
-
-#define DEBUG_LOG(fmt, ...) BASIC_LOG(CWSLib::LogLevel::DEBUG, "[DEBUG] " fmt, ##__VA_ARGS__)
-#define NORMAL_LOG(fmt, ...) BASIC_LOG(CWSLib::LogLevel::NORMAL, "[NORMAL] " fmt, ##__VA_ARGS__)
-#define WARN_LOG(fmt, ...) BASIC_LOG(CWSLib::LogLevel::WARNING, "[WARNING] " fmt, ##__VA_ARGS__)
-#define ERROR_LOG(fmt, ...) BASIC_LOG(CWSLib::LogLevel::ERROR, "[ERROR] " fmt, ##__VA_ARGS__)
-
 #endif // !__LOGGER_H__
 

@@ -3,7 +3,7 @@
 #include "test.h"
 #include "TestTask.h"
 #include "commlib/thread_pool/ThreadPool.h"
-#include "commlib/logger/Logger.h"
+#include "commlib/app/MacroAssemble.h"
 
 #include <iostream>
 
