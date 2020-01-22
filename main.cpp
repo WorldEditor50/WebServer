@@ -7,6 +7,7 @@ int main(int argc, char** argv)
 {
     //CWSTest::helloWorld();
     //CWSTest::threadPool();
-    CWSTest::log();
+    //CWSTest::log();
+    CWSTest::json();
     return 0;
 }

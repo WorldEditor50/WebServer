@@ -8,6 +8,7 @@ namespace CWSTest
     void helloWorld();
     void threadPool();
     void log();
+    void json();
 }
 
 #endif // !__TEST_H__
