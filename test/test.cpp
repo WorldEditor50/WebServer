@@ -46,7 +46,7 @@ void CWSTest::log()
 
 void CWSTest::json()
 {
-	/*CWSLib::Json json;
+	CWSLib::Json json;
 	TestJson testObject;
 	testObject.numA = 100;
 	testObject.numB = 150;
@@ -71,14 +71,14 @@ void CWSTest::json()
 
 	json << testObject;
 
-	std::cout << json.toString() << "\n\n\n";
+	/*std::cout << json.toString() << "\n\n\n";
 	std::cout << json.toFmtString() << "\n\n\n";
 
 	CWSLib::Json jsonArray;
 	jsonArray << testObject.subList;
 	std::cout << jsonArray.toFmtString() << "\n";*/
 
-	//std::string input = "{\"name\":\"Alpha\",\"age\":26,\"friends\":[\"Bill\",\"Anny\"]}";
+	/*//std::string input = "{\"name\":\"Alpha\",\"age\":26,\"friends\":[\"Bill\",\"Anny\"]}";
 	std::string input = "{\"name\":\"Alpha\",\"age\":26,\"score\":{\"math\":99,\"pe\":88}}";
 	//std::string input = "[\"Bill\",\"Anny\"]";
 	//std::string input = "{\"name\":\"Alpha\",\"age\":26,\"friends\":\"Bill\"}";
@@ -86,12 +86,15 @@ void CWSTest::json()
 	if (json.parse(input) == 0)
 		std::cout << json.toFmtString() << "\n";
 	else
-		std::cout << "parse error\n";
+		std::cout << "parse error\n";*/
 
 	/*std::vector<int> intList{1, 2, 3, 5, 7, 9};
 	CWSLib::Json jsonArray;
 	jsonArray << intList;
-	std::cout << jsonArray.toFmtString() << "\n";*/
+	std::cout << jsonArray.toFmtString() << "\n\n";*/
+	CWSLib::Json psJson;
+	psJson.parse(json.toString());
+	std::cout << psJson.toFmtString() << "\n";
 }
 
 

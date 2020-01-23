@@ -10,6 +10,15 @@
 
 namespace CWSLib
 {
+	enum class JNodeType
+	{
+		NUMERIC,
+		BOOL,
+		STRING,
+		LIST,
+		STRUCT,
+	};
+
 	class JValue
 	{
 	public:
@@ -17,6 +26,7 @@ namespace CWSLib
 
 		virtual std::string pack() = 0;
 		virtual std::string packFmt() = 0;
+		virtual JNodeType type() = 0;
 
 		virtual void setLevel(int level) { mLevel = level; }
 		int getLevel() { return mLevel; }
@@ -41,6 +51,10 @@ namespace CWSLib
 		{
 			return pack();
 		}
+		virtual JNodeType type()
+		{
+			return JNodeType::NUMERIC;
+		}
 
 	private:
 		T mVal;
@@ -57,6 +71,10 @@ namespace CWSLib
 		virtual std::string packFmt()
 		{
 			return pack();
+		}
+		virtual JNodeType type()
+		{
+			return JNodeType::BOOL;
 		}
 
 	private:
@@ -75,6 +93,10 @@ namespace CWSLib
 		{
 			return pack();
 		}
+		virtual JNodeType type()
+		{
+			return JNodeType::STRING;
+		}
 
 	private:
 		std::string mVal;
@@ -86,6 +108,11 @@ namespace CWSLib
 		virtual void setLevel(int level);
 		virtual std::string pack();
 		virtual std::string packFmt();
+		virtual JNodeType type()
+		{
+			return JNodeType::LIST;
+		}
+
 		void addElement(int item)       { addNumeric(item); }
 		void addElement(long long item) { addNumeric(item); }
 		void addElement(double item)    { addNumeric(item); }
@@ -171,6 +198,10 @@ namespace CWSLib
 		virtual std::string pack();     // pack parameter of structure
 		virtual std::string packFmt();  // pack parameter of structure in format
 		virtual void setLevel(int level);
+		virtual JNodeType type()
+		{
+			return JNodeType::STRUCT;
+		}
 
 	private:
 		template<typename NumericType>

@@ -50,3 +50,8 @@ bool CWSLib::isInt(const std::string& input)
 	}
 	return true;
 }
+
+bool CWSLib::isBool(const std::string& input)
+{
+	return (input == "true") || (input == "false");
+}

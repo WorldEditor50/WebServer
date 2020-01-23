@@ -77,18 +77,28 @@ int CWSLib::Json::parse(const std::string& jsonString)
 				// just a part of a key or value
 				nameStack.push_back(',');
 			}
-			else if(!nameStack.empty() && !keyStack.empty() && !nodeStack.empty())
+			else if(!nameStack.empty() && !nodeStack.empty())
 			{
-				if (addNumericToNode(nameStack, keyStack.back(), nodeStack) != 0)
+				if (!keyStack.empty())
 				{
-					return -1;
+					if (addNumericToNode(nameStack, keyStack.back(), nodeStack) != 0)
+					{
+						return -1;
+					}
+					keyStack.pop_back();
+					if (symbolStack.back() == ':')
+					{
+						symbolStack.pop_back();
+					}
+				}
+				else
+				{
+					if (addNumericToList(nameStack, nodeStack) != 0)
+					{
+						return -1;
+					}
 				}
 				nameStack.clear();
-				keyStack.pop_back();
-				if (symbolStack.back() == ':')
-				{
-					symbolStack.pop_back();
-				}
 			}
 			break;
 
@@ -144,7 +154,7 @@ int CWSLib::Json::parse(const std::string& jsonString)
 
 		default:
 			nameStack.push_back(ch);
-			if (ch >= '0' && ch <= '9' && i + 1 < length)
+			if (((ch >= '0' && ch <= '9') || ch == 'e' ) && i + 1 < length)
 			{
 				if (jsonString.at(i + 1) == ']')
 				{
@@ -207,6 +217,10 @@ int CWSLib::Json::addNumericToNode(const std::string& numStr, const std::string&
 	{
 		node->addElement(key, std::stoi(numStr));
 	}
+	else if (isBool(numStr))
+	{
+		node->addElement(key, numStr == "true");
+	}
 	else
 	{
 		return -1;
@@ -231,10 +245,15 @@ int CWSLib::Json::addNumericToList(
 	{
 		node->addElement(std::stoi(numStr));
 	}
+	else if (isBool(numStr))
+	{
+		node->addElement(numStr == "true");
+	}
 	else
 	{
 		return -1;
 	}
+	return 0;
 }
 
 int CWSLib::Json::concludeNode(char input,
@@ -261,17 +280,21 @@ int CWSLib::Json::concludeNode(char input,
 	{
 		JValue* papaNode = nodeStack[nodeSize - 2].get();
 		JValue* lastNode = nodeStack[nodeSize - 1].release();
-		if (keyStack.empty())
+		if (papaNode->type() == JNodeType::LIST)
 		{
 			dynamic_cast<JListValue*>(papaNode)->addElement(lastNode);
 		}
-		else
+		else if (papaNode->type() == JNodeType::STRUCT && !keyStack.empty())
 		{
 			dynamic_cast<JsonNode*>(papaNode)->addElement(keyStack.back(), lastNode);
 			if (!symbolStack.empty() || symbolStack.back() == ':')
 			{
 				symbolStack.pop_back();
 			}
+		}
+		else
+		{
+			return -1;
 		}
 		nodeStack.pop_back();
 	}
@@ -282,6 +305,7 @@ int CWSLib::Json::concludeNode(char input,
 
 
 /////////**************** JSON NODE *****************//////////
+
 void CWSLib::JsonNode::addElement(const std::string& key, bool item)
 {
 	auto itor = mJsonMap.find(key);
