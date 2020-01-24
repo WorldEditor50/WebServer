@@ -6,7 +6,7 @@
 #include <iostream>
 #include <vector>
 #include <cstring>
-#include <exception>
+//#include <exception>
 
 void CWSLib::ArgumentParser::addDefaultArg(const COption& option)
 {
@@ -43,7 +43,8 @@ void CWSLib::ArgumentParser::parse(int argc, char** argv)
 			else
 			{
 				printErrorInfo();
-				throw std::exception("more than one command in stack");
+				exit(-1);
+				//throw std::exception("more than one command in stack");
 			}
 		}
 		else
@@ -58,7 +59,8 @@ void CWSLib::ArgumentParser::parse(int argc, char** argv)
 			{
 				DEBUG_LOG("[%s] is not match with any command.", argv[i]);
 				printErrorInfo();
-				throw std::exception("value is not match with any command");
+				exit(-1);
+				//throw std::exception("value is not match with any command");
 			}
 		}
 	}
@@ -67,7 +69,8 @@ void CWSLib::ArgumentParser::parse(int argc, char** argv)
 	{
 		DEBUG_LOG("error command [%s]", commandStack.front().c_str());
 		printErrorInfo();
-		throw std::exception("error command");
+		exit(-1);
+		//throw std::exception("error command");
 	}
 }
 

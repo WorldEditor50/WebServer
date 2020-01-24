@@ -9,7 +9,7 @@ OPTIONS += $(COMPILE_INC)
 TARGET := cwslib.a
 
 $(TARGET):$(OBJ_FULL_PATH) $(INC_FULL_PATH)
-	ar crv $(TARGET) $(OBJ_FULL_PATH) $(OPTIONS)
+	ar -rv $(TARGET) $(OBJ_FULL_PATH)
 
 %.o:%.cpp
 	g++ -o $@ -c $< $(OPTIONS)

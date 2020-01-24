@@ -102,6 +102,11 @@ namespace CWSLib
 		std::string mVal;
 	};
 
+	class JListValue;
+	class JsonNode;
+	template<typename Struct>
+	void addNodeToList(Struct& item, JListValue* list);
+
 	class JListValue : public JValue
 	{
 	public:
@@ -123,10 +128,7 @@ namespace CWSLib
 		template<typename Struct>
 		void addElement(Struct& item)
 		{
-			JsonNode* node = new JsonNode;
-			node->setLevel(this->getLevel() + 1);
-			item.toJson(*node);
-			mList.push_back(std::unique_ptr<JValue>(node));
+			addNodeToList(item, this);
 		}
 
 		template<typename ElemType>
@@ -175,7 +177,7 @@ namespace CWSLib
 			JsonNode* node = new JsonNode;
 			node->setLevel(this->getLevel() + 1);
 			item.toJson(*node);
-			mJsonMap.insert(std::make_pair(key, node));
+			mJsonMap.insert(std::make_pair(key, std::unique_ptr<JValue>(node)));
 		}
 
 		template<typename ElemType>
@@ -192,7 +194,7 @@ namespace CWSLib
 			{
 				listVal->addElement(item);
 			}
-			mJsonMap.insert(std::make_pair(key, listVal));
+			mJsonMap.insert(std::make_pair(key, std::unique_ptr<JValue>(listVal)));
 		}
 
 		virtual std::string pack();     // pack parameter of structure
@@ -214,7 +216,7 @@ namespace CWSLib
 			}
 			JNumValue<NumericType>* node = new JNumValue<NumericType>(item);
 			node->setLevel(this->getLevel() + 1);
-			mJsonMap.insert(std::make_pair(key, node));
+			mJsonMap.insert(std::make_pair(key, std::unique_ptr<JValue>(node)));
 		}
 
 	private:
@@ -262,6 +264,15 @@ namespace CWSLib
 	private:
 		std::unique_ptr<JValue> mRootNode;
 	};
+
+	template<typename Struct>
+	void addNodeToList(Struct& item, JListValue* list)
+	{
+		JsonNode* node = new JsonNode;
+		node->setLevel(list->getLevel() + 1);
+		item.toJson(*node);
+		list->addElement(dynamic_cast<JValue*>(node));
+	}
 }
 
 #endif // !__JSON_H__

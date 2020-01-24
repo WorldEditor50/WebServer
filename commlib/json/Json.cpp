@@ -315,7 +315,7 @@ void CWSLib::JsonNode::addElement(const std::string& key, bool item)
 	}
 	JBoolValue* node = new JBoolValue(item);
 	node->setLevel(this->getLevel() + 1);
-	mJsonMap.insert(std::make_pair(key, node));
+	mJsonMap.insert(std::make_pair(key, std::unique_ptr<JValue>(node)));
 }
 
 void CWSLib::JsonNode::addElement(const std::string& key, std::string& item)
@@ -327,12 +327,12 @@ void CWSLib::JsonNode::addElement(const std::string& key, std::string& item)
 	}
 	JStringValue* node = new JStringValue(item);
 	node->setLevel(this->getLevel() + 1);
-	mJsonMap.insert(std::make_pair(key, node));
+	mJsonMap.insert(std::make_pair(key, std::unique_ptr<JValue>(node)));
 }
 
 void CWSLib::JsonNode::addElement(const std::string& key, JValue* node)
 {
-	mJsonMap.insert(std::make_pair(key, node));
+	mJsonMap.insert(std::make_pair(key, std::unique_ptr<JValue>(node)));
 }
 
 std::string CWSLib::JsonNode::pack()
