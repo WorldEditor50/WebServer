@@ -1,7 +1,6 @@
 
 
 #include "Json.h"
-#include "commlib/basic/numeric.h"
 
 #include <sstream>
 #include <iostream>
@@ -199,6 +198,60 @@ std::string CWSLib::Json::toString()
 std::string CWSLib::Json::toFmtString()
 {
 	return mRootNode->packFmt();
+}
+
+bool CWSLib::Json::isDouble(const std::string& input)
+{
+	bool hasPoint = false;
+	for (auto item : input)
+	{
+		if (item == '.')
+		{
+			hasPoint = true;
+		}
+		else if (item > '9' || item < '0')
+		{
+			return false;
+		}
+	}
+	return hasPoint;
+}
+
+bool CWSLib::Json::isLonglong(const std::string& input)
+{
+	if (input.size() < 10)
+	{
+		return false;
+	}
+	for (auto item : input)
+	{
+		if (item > '9' || item < '0')
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
+bool CWSLib::Json::isInt(const std::string& input)
+{
+	if (input.size() >= 10)
+	{
+		return false;
+	}
+	for (auto item : input)
+	{
+		if (item > '9' || item < '0')
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
+bool CWSLib::Json::isBool(const std::string& input)
+{
+	return (input == "true") || (input == "false");
 }
 
 int CWSLib::Json::addNumericToNode(const std::string& numStr, const std::string& key,

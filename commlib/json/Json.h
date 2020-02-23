@@ -252,6 +252,11 @@ namespace CWSLib
 			item.toJson(*node);
 		}
 
+		static bool isDouble(const std::string& input);
+		static bool isLonglong(const std::string& input);
+		static bool isInt(const std::string& input);
+		static bool isBool(const std::string& input);
+
 	private:
 		int addNumericToNode(const std::string& numStr, const std::string& key,
 			std::vector<std::unique_ptr<JValue>>& nodeStack);

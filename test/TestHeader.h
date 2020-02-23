@@ -6,7 +6,7 @@
 #include <string>
 #include <iostream>
 #include <vector>
-#include "commlib/json/json.h"
+#include "commlib/json/Json.h"
 
 struct SubStruct
 {
