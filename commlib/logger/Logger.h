@@ -4,7 +4,7 @@
 #define __LOGGER_H__
 
 #include "commlib/basic/CommonSingleton.h"
-#include "commlib/string/StringUtils.h"
+#include "commlib/basic/StringUtils.h"
 
 #include <string>
 
