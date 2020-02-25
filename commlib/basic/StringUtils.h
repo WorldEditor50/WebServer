@@ -5,13 +5,16 @@
 
 #include <string>
 #include <stdarg.h>
+#include <vector>
 
 namespace CWSLib
 {
 namespace String
 {
-    // no more than 4096 bytes
-    std::string format(const char* fmt, ...);
+	// no more than 4096 bytes
+	std::string format(const char* fmt, ...);
+
+	void split(std::vector<std::string>& strList, const std::string& src, char spliter);
 }
 }
 

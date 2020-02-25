@@ -439,6 +439,16 @@ void CWSLib::JsonNode::setLevel(int level)
 	}
 }
 
+CWSLib::JValue* CWSLib::JsonNode::getElement(const std::string& key)
+{
+	auto itor = mJsonMap.find(key);
+	if (itor == mJsonMap.end())
+	{
+		return nullptr;
+	}
+	return itor->second.get();
+}
+
 void CWSLib::JListValue::setLevel(int level)
 {
 	JValue::setLevel(level);

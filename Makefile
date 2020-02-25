@@ -5,7 +5,11 @@ COM_FLAG = -std=c++11
 COMM_LIB = commlib/cwslib.a
 OUT_FILE = cws_server
 
-COM_OBJ_FILE = 
+FRAME_DIR = ./frame ./src
+COMPILE_SUBDIR = $(shell find $(FRAME_DIR) -type d)
+COMPILE_SRC += $(foreach dir,$(COMPILE_SUBDIR),$(wildcard $(dir)/*.cpp))
+COMPILE_INC += $(foreach dir,$(COMPILE_SUBDIR),$(wildcard $(dir)/*.h))
+COM_OBJ_FILE = $(patsubst %.cpp, %.o, $(COMPILE_SRC))
 
 TEST_PATH = ./test/
 TEST_SRC_FILE = $(wildcard $(TEST_PATH)*.cpp)
