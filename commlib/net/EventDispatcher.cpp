@@ -144,7 +144,11 @@ namespace CWSLib
 					registEvent.data.fd = sockFd; // 设置用于写操作的文件描述符
 					registEvent.events = EPOLLOUT | EPOLLET; // 设置用于注册的写操作事件
 					epoll_ctl(epfd, EPOLL_CTL_MOD, sockFd, &registEvent); // 修改sockFd上要处理的事件为EPOLLOUT
-					cbFunc(line);
+					
+					CbContext context;
+					context.data = line;
+					context.socketfd = sockFd;
+					cbFunc(context);
 				}
 				else if (events[i].events & EPOLLOUT) // 如果有数据发送
 				{
@@ -220,6 +224,12 @@ namespace CWSLib
 		}
 		//write(sock, buf, size);
 		return sendCnt;
+	}
+
+
+	void CbContext::close(int socketfd)
+	{
+		close(socketfd);
 	}
 }
 

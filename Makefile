@@ -1,9 +1,9 @@
 INC_PATH = ./
 SRC_FILE = main.cpp
 COM_FLAG = -std=c++11
-#COM_FLAG+=__VERSION_FOR_RELEASE__
 COMM_LIB = commlib/cwslib.a
 OUT_FILE = cws_server
+CLIENT_FILE = cws_client
 
 FRAME_DIR = ./frame ./src
 COMPILE_SUBDIR = $(shell find $(FRAME_DIR) -type d)
@@ -19,6 +19,9 @@ COM_OBJ_FILE += $(TEST_OBJ_FILE)
 
 $(OUT_FILE) : $(COMM_LIB) $(SRC_FILE) $(COM_OBJ_FILE)
 	g++ -o $(OUT_FILE) $(SRC_FILE) $(COM_OBJ_FILE) $(COMM_LIB) $(COM_FLAG)
+
+$(CLIENT_FILE) : $(COMM_LIB) $(SRC_FILE) $(COM_OBJ_FILE)
+	g++ -o $(CLIENT_FILE) $(SRC_FILE) $(COM_OBJ_FILE) $(COMM_LIB) $(COM_FLAG) -DCLIENT_MAIN
 
 %.o:%.cpp
 	g++ -o $@ -c -I$(INC_PATH) $< $(COM_FLAG)

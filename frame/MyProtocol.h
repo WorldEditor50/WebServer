@@ -6,6 +6,7 @@
 #include <string>
 
 #include "commlib/basic/Json.h"
+#include "commlib/net/EventDispatcher.h"
 
 /*
 Protocol Introduction:
@@ -28,13 +29,28 @@ struct ProtoData
 	}
 };
 
+struct RespData
+{
+	int32_t errcode;
+	std::string errorMsg;
+	std::string paramList;
+
+	void toJson(CWSLib::JsonNode& node)
+	{
+		node.addElement("error_code", errcode);
+		node.addElement("error_msg", errorMsg);
+		node.addElement("parameters", paramList);
+	}
+};
+
 class MyProtocol
 {
 public:
-	void parse(const char* content);
+	void process(CWSLib::CbContext& content);
 
 private:
 	ProtoData data;
+	RespData resp;
 };
 
 #endif // !__MY_PROTOCOL_H__

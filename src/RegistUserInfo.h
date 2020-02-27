@@ -9,9 +9,9 @@ class RegistUserInfo : public BaseTask
 {
 public:
 
-	virtual void parseRequest();
-	virtual void process();
-	virtual void packResponse();
+	virtual void parseRequest(CWSLib::Param& input) override;
+	virtual void process() override;
+	virtual void packResponse(CWSLib::Param& output) override;
 
 private:
 

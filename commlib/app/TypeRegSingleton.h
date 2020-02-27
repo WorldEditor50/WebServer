@@ -45,12 +45,12 @@ class TypeFactory
 public:
 	BaseClass* create(const std::string& className)
 	{
-		void* funcPtr = CTypeRegContainer::instance().create(className);
+		CbFunc funcPtr = (CbFunc)CTypeRegContainer::instance().create(className);
 		if (funcPtr == nullptr)
 		{
 			return nullptr;
 		}
-		return static_cast<CbFunc>(funcPtr)();
+		return funcPtr();
 	}
 
 	void join(const std::string& className, CbFunc __cb)

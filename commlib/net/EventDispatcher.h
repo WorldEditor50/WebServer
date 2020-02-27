@@ -5,10 +5,18 @@
 
 #include <string>
 
-typedef void __svcCallback(const char*);
-
 namespace CWSLib
 {
+	struct CbContext
+	{
+		std::string data;
+		int socketfd;
+
+		static void close(int socketfd);
+	};
+
+	typedef void __svcCallback(CWSLib::CbContext&);
+
 	class EventDispatcher
 	{
 	public:
