@@ -4,6 +4,10 @@
 
 #include <iostream>
 
+CWSLib::ThreadPool::~ThreadPool()
+{
+}
+
 void CWSLib::ThreadPool::init(int initThreadNum, int maxTaskNum, int maxThreadNum)
 {
     mInitThdnum = initThreadNum;
@@ -20,7 +24,7 @@ void CWSLib::ThreadPool::init(int initThreadNum, int maxTaskNum, int maxThreadNu
     }
 }
 
-void CWSLib::ThreadPool::addTask(BaseTask* task)
+void CWSLib::ThreadPool::addTask(BaseJob* task)
 {
     if (!task)
     {
@@ -29,9 +33,9 @@ void CWSLib::ThreadPool::addTask(BaseTask* task)
 
     // 看任务队列是否已达阈值以及线程是否已达上限
     std::unique_lock<std::mutex> ulock(mMutex);
-    if (mTasks.size() < mTaskLimit)
+    if (mJobList.size() < mTaskLimit)
     {
-        mTasks.addTask(task);
+        mJobList.addTask(task);
         mWakeCond.notify_one();
     }
     else if (mCurrentThdSize < mThreadLimit)
@@ -40,13 +44,13 @@ void CWSLib::ThreadPool::addTask(BaseTask* task)
             this->work();
             });
         thd.detach();
-        mTasks.addTask(task);
+        mJobList.addTask(task);
         mWakeCond.notify_one();
     }
     else
     {
         mPushCond.wait(ulock, [&]() {
-            return (mTasks.size() < mTaskLimit) || (mCurrentThdSize < mThreadLimit);
+            return (mJobList.size() < mTaskLimit) || (mCurrentThdSize < mThreadLimit);
             });
     }
 }
@@ -65,40 +69,40 @@ void CWSLib::ThreadPool::work()
 
     while (true)
     {
-        std::unique_ptr<BaseTask> task;
+        std::unique_ptr<BaseJob> task;
 
         {
             std::unique_lock<std::mutex> ulock(mMutex);
             mWakeCond.wait(ulock, [&]() {
-                return !this->mContinue || !this->mTasks.empty();
+                return !this->mContinue || !this->mJobList.empty();
                 });
             if (!this->mContinue)
             {
-                std::cout << std::this_thread::get_id() << " quit\n";
+                //std::cout << std::this_thread::get_id() << " quit\n";
                 mCurrentThdSize--;
-                std::cout << "thread size:" << mCurrentThdSize << "\n";
+                //std::cout << "thread size:" << mCurrentThdSize << "\n";
                 return;
             }
 
-            task = std::unique_ptr<BaseTask>(mTasks.getTask());
-            mTasks.popTask();
+            task = std::unique_ptr<BaseJob>(mJobList.getTask());
+            mJobList.popTask();
 
         }
 
         // 当任务队列减少时，唤醒任务队列
-        if (mTasks.size() < mTaskLimit)
+        if (mJobList.size() < mTaskLimit)
         {
             mPushCond.notify_one();
         }
         task->excute();
 
         // 根据实时的任务情况，适当减少当前运行的线程
-        if (mTasks.size() < mTaskLimit / 2 && mCurrentThdSize > mInitThdnum)
+        if (mJobList.size() < mTaskLimit / 2 && mCurrentThdSize > mInitThdnum)
         {
             std::unique_lock<std::mutex> ulock(mMutex);
-            std::cout << std::this_thread::get_id() << " quit\n";
+            //std::cout << std::this_thread::get_id() << " quit\n";
             mCurrentThdSize--;
-            std::cout << "thread size:" << mCurrentThdSize << "\n";
+            //std::cout << "thread size:" << mCurrentThdSize << "\n";
             return;
         }
     }
@@ -107,16 +111,16 @@ void CWSLib::ThreadPool::work()
 
 
 
-CWSLib::TaskList::~TaskList()
+CWSLib::JobList::~JobList()
 {
 }
 
-void CWSLib::TaskList::addTask(BaseTask* task)
+void CWSLib::JobList::addTask(BaseJob* task)
 {
-    mTaskList.push_back(std::unique_ptr<BaseTask>(task));
+    mTaskList.push_back(std::unique_ptr<BaseJob>(task));
 }
 
-CWSLib::BaseTask* CWSLib::TaskList::getTask()
+CWSLib::BaseJob* CWSLib::JobList::getTask()
 {
     if (!mTaskList.empty())
     {
@@ -128,7 +132,7 @@ CWSLib::BaseTask* CWSLib::TaskList::getTask()
     }
 }
 
-void CWSLib::TaskList::popTask()
+void CWSLib::JobList::popTask()
 {
     if (!mTaskList.empty())
     {
@@ -136,12 +140,12 @@ void CWSLib::TaskList::popTask()
     }
 }
 
-bool CWSLib::TaskList::empty()
+bool CWSLib::JobList::empty()
 {
     return mTaskList.empty();
 }
 
-int CWSLib::TaskList::size()
+int CWSLib::JobList::size()
 {
     return mTaskList.size();
 }

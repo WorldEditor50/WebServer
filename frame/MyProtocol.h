@@ -7,6 +7,9 @@
 
 #include "commlib/basic/Json.h"
 #include "commlib/net/EventDispatcher.h"
+#include "commlib/thread_pool/ThreadPool.h"
+#include "commlib/thread_pool/BaseJob.h"
+#include "commlib/basic/CommonSingleton.h"
 
 /*
 Protocol Introduction:
@@ -43,6 +46,19 @@ struct RespData
 	}
 };
 
+class BusinessJob : public CWSLib::BaseJob
+{
+public:
+	BusinessJob(const ProtoData& data);
+
+	virtual void excute() override;
+
+private:
+
+private:
+	ProtoData mData;
+};
+
 class MyProtocol
 {
 public:
@@ -50,7 +66,6 @@ public:
 
 private:
 	ProtoData data;
-	RespData resp;
 };
 
 #endif // !__MY_PROTOCOL_H__

@@ -12,3 +12,9 @@ make clean -- To clean all object files
 make client -- To build client file  
 ## <3> How to start develope?
 ///TODO...
+## <4> Level of internal dependency
+level|directories  
+:--:|--  
+basic|commlib  
+frame|frame  
+business|src  

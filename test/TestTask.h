@@ -9,9 +9,9 @@
 #include <ctime>
 #include <cstdlib>
 
-#include "commlib/thread_pool/BaseTask.h"
+#include "commlib/thread_pool/BaseJob.h"
 
-class TestTask : public CWSLib::BaseTask
+class TestTask : public CWSLib::BaseJob
 {
 public:
     virtual void excute()

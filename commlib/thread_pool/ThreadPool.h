@@ -9,24 +9,24 @@
 #include <mutex>
 #include <condition_variable>
 
-#include "BaseTask.h"
+#include "BaseJob.h"
 
 namespace CWSLib
 {
-    class TaskList
+    class JobList
     {
     public:
-        ~TaskList();
+        ~JobList();
 
-        void addTask(BaseTask* task);
-        BaseTask* getTask();
+        void addTask(BaseJob* task);
+        BaseJob* getTask();
         void popTask();
         bool empty();
         int size();
 
     private:
         //std::list<BaseTask*> mTaskList;
-        std::list<std::unique_ptr<BaseTask>> mTaskList;
+        std::list<std::unique_ptr<BaseJob>> mTaskList;
     };
 
     class ThreadPool
@@ -34,12 +34,13 @@ namespace CWSLib
     public:
         ThreadPool() : mTaskLimit(0), mThreadLimit(0), mInitThdnum(0), mContinue(true),
             mCurrentThdSize(0) {}
+        ~ThreadPool();
 
         // initThreadNum -- number of working threads
         // maxTaskNum -- max task number in task list
         // maxThreadNum -- max working thread number
         void init(int initThreadNum, int maxTaskNum, int maxThreadNum);
-        void addTask(BaseTask* task);
+        void addTask(BaseJob* task);
         void shutdown();
 
     private:
@@ -52,7 +53,7 @@ namespace CWSLib
         int mCurrentThdSize;
         bool mContinue;
 
-        TaskList mTasks;
+        JobList mJobList;
         std::mutex mMutex;
         std::condition_variable mWakeCond;
         std::condition_variable mPushCond;

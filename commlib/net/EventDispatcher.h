@@ -15,7 +15,7 @@ namespace CWSLib
 		static void close(int socketfd);
 	};
 
-	typedef void __svcCallback(CWSLib::CbContext&);
+	typedef void (*__svcCallback)(CWSLib::CbContext&);
 
 	class EventDispatcher
 	{
@@ -24,9 +24,9 @@ namespace CWSLib
 
 		~EventDispatcher();
 
-		int32_t init();
+		int32_t init(__svcCallback cbFunc);
 
-		int32_t wait(__svcCallback cbFunc);
+		int32_t wait();
 
 	private:
 
@@ -39,6 +39,9 @@ namespace CWSLib
 	private:
 		int epfd;
 		int listenFd;
+		int timeout;
+		int maxEvent;
+		__svcCallback mCb;
 	};
 }
 

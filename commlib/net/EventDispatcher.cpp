@@ -17,23 +17,26 @@
 #include <stdio.h>
 #include <errno.h>
 
-const static int MAXLINE = 30000;
-const static int OPEN_MAX = 100;
-const static int LISTENQ = 20;
-const static int SERV_PORT = 12000;
-const static int INFTIM = 1000;
-
 namespace CWSLib
 {
+	const static int MAXLINE = 30000;
+	const static int OPEN_MAX = 100;
+	const static int LISTENQ = 20;
+	const static int SERV_PORT = 12000;
+	const static int INFTIM = 1000;
+	static epoll_event events[20];
+
 	EventDispatcher::EventDispatcher()
 	{
+		timeout = 200;
+		maxEvent = 100;
 	}
 
 	EventDispatcher::~EventDispatcher()
 	{
 	}
 
-	int32_t EventDispatcher::init()
+	int32_t EventDispatcher::init(__svcCallback cbFunc)
 	{
 		std::cout << "Initialize service...\n";
 		epfd = epoll_create(256); // 生成用于处理accept的epoll专用的文件描述符
@@ -56,112 +59,109 @@ namespace CWSLib
 		bind(listenFd, (sockaddr*)&serverAddr, sizeof(serverAddr));
 		listen(listenFd, LISTENQ);
 
+		mCb = cbFunc;
 		return 0;
 	}
 
-	int32_t EventDispatcher::wait(__svcCallback cbFunc)
+	int32_t EventDispatcher::wait()
 	{
-		DEBUG_LOG("Start waiting...");
-		epoll_event events[20];
-		for (; ; )
+		char hostBuf[NI_MAXHOST]; // IP地址缓存
+		char portBuf[NI_MAXSERV]; // PORT缓存
+
+		// 等待epoll事件的发生
+		int fdNum = epoll_wait(epfd, events, maxEvent, timeout);
+		// 处理所发生的所有事件
+		for (int i = 0; i < fdNum; ++i)
 		{
-			char hostBuf[NI_MAXHOST]; // IP地址缓存
-			char portBuf[NI_MAXSERV]; // PORT缓存
-
-			// 等待epoll事件的发生
-			int fdNum = epoll_wait(epfd, events, 20, 500);
-			// 处理所发生的所有事件
-			for (int i = 0; i < fdNum; ++i)
+			if (events[i].data.fd == listenFd)
 			{
-				if (events[i].data.fd == listenFd)
+				// 由于采用了边缘触发模式，这里需要使用循环，保证所有新的连接都被注册
+				for (; ; )
 				{
-					// 由于采用了边缘触发模式，这里需要使用循环，保证所有新的连接都被注册
-					for (; ; )
+					sockaddr_in clientAddr = { 0 };
+					socklen_t addrSize = sizeof(clientAddr);
+					int connFd = accept(listenFd, (sockaddr*)&clientAddr, &addrSize);
+					if (-1 == connFd)
 					{
-						sockaddr_in clientAddr = { 0 };
-						socklen_t addrSize = sizeof(clientAddr);
-						int connFd = accept(listenFd, (sockaddr*)&clientAddr, &addrSize);
-						if (-1 == connFd)
-						{
-							//perror("Accept");
-							ERROR_LOG("Accept error");
-							break;
-						}
-						int ret = getnameinfo((sockaddr*)&clientAddr, sizeof(clientAddr),
-							hostBuf, sizeof(hostBuf) / sizeof(hostBuf[0]),
-							portBuf, sizeof(portBuf) / sizeof(portBuf[0]),
-							NI_NUMERICHOST | NI_NUMERICSERV);
-						if (!ret)
-						{
-							DEBUG_LOG("New connection: host = %s, port = %s\n", hostBuf, portBuf);
-						}
-						DEBUG_LOG("Receive new connection[%d]\n", connFd);
+						//perror("Accept");
+						ERROR_LOG("Accept error");
+						break;
+					}
+					int ret = getnameinfo((sockaddr*)&clientAddr, sizeof(clientAddr),
+						hostBuf, sizeof(hostBuf) / sizeof(hostBuf[0]),
+						portBuf, sizeof(portBuf) / sizeof(portBuf[0]),
+						NI_NUMERICHOST | NI_NUMERICSERV);
+					if (!ret)
+					{
+						DEBUG_LOG("New connection: host = %s, port = %s\n", hostBuf, portBuf);
+					}
+					DEBUG_LOG("Receive new connection[%d]\n", connFd);
 
-						setNonblocking(connFd);
-						epoll_event registEvent;
-						registEvent.data.fd = connFd; // 设置用于读操作的文件描述符
-						registEvent.events = EPOLLIN | EPOLLET; // 设置用于注册的读操作事件
-						// 为新accept的 file describe 设置epoll事件
-						if (-1 == epoll_ctl(epfd, EPOLL_CTL_ADD, connFd, &registEvent))
-						{
-							ERROR_LOG("epoll_ctl");
-							return 0;
-						}
+					setNonblocking(connFd);
+					epoll_event registEvent;
+					registEvent.data.fd = connFd; // 设置用于读操作的文件描述符
+					registEvent.events = EPOLLIN | EPOLLET; // 设置用于注册的读操作事件
+					// 为新accept的 file describe 设置epoll事件
+					if (-1 == epoll_ctl(epfd, EPOLL_CTL_ADD, connFd, &registEvent))
+					{
+						ERROR_LOG("epoll_ctl");
+						return -1;
 					}
 				}
-				else if (events[i].events & EPOLLIN)
+			}
+			else if (events[i].events & EPOLLIN)
+			{
+				char line[MAXLINE] = { 0 };
+				int sockFd;
+				//如果是已经连接的用户，并且收到数据，那么进行读入。
+				DEBUG_LOG("EPOLLIN");
+				if ((sockFd = events[i].data.fd) < 0)
+					continue;
+				ssize_t socketLen;
+				if ((socketLen = readAll(sockFd, line, MAXLINE)) < 0)
 				{
-					char line[MAXLINE] = { 0 };
-					int sockFd;
-					//如果是已经连接的用户，并且收到数据，那么进行读入。
-					DEBUG_LOG("EPOLLIN");
-					if ((sockFd = events[i].data.fd) < 0)
-						continue;
-					ssize_t socketLen;
-					if ((socketLen = readAll(sockFd, line, MAXLINE)) < 0)
-					{
-						if (errno == ECONNRESET)
-						{
-							close(sockFd);
-							events[i].data.fd = -1;
-							//epoll_ctl(epfd, EPOLL_CTL_DEL, events[i].data.fd, NULL);
-							DEBUG_LOG("Close socket[%d]\n", sockFd);
-						}
-						else
-						{
-							DEBUG_LOG("read out");
-						}
-					}
-					else if (socketLen == 0)
+					if (errno == ECONNRESET)
 					{
 						close(sockFd);
 						events[i].data.fd = -1;
 						//epoll_ctl(epfd, EPOLL_CTL_DEL, events[i].data.fd, NULL);
 						DEBUG_LOG("Close socket[%d]\n", sockFd);
 					}
-					DEBUG_LOG("Read line[%d]\n", line);
-					epoll_event registEvent;
-					registEvent.data.fd = sockFd; // 设置用于写操作的文件描述符
-					registEvent.events = EPOLLOUT | EPOLLET; // 设置用于注册的写操作事件
-					epoll_ctl(epfd, EPOLL_CTL_MOD, sockFd, &registEvent); // 修改sockFd上要处理的事件为EPOLLOUT
-					
-					CbContext context;
-					context.data = line;
-					context.socketfd = sockFd;
-					cbFunc(context);
+					else
+					{
+						DEBUG_LOG("read out");
+					}
 				}
-				else if (events[i].events & EPOLLOUT) // 如果有数据发送
+				else if (socketLen == 0)
 				{
-					char line[MAXLINE];
-					int sockFd = events[i].data.fd;
-					writeAll(sockFd, line, strnlen(line, sizeof(line)));
-					epoll_event registEvent;
-					registEvent.data.fd = sockFd; // 设置用于读操作的文件描述符
-					registEvent.events = EPOLLIN | EPOLLET; // 设置用于注册的读操作事件
-					epoll_ctl(epfd, EPOLL_CTL_MOD, sockFd, &registEvent); // 修改sockFd上要处理的事件为EPOLIN
+					close(sockFd);
+					events[i].data.fd = -1;
+					//epoll_ctl(epfd, EPOLL_CTL_DEL, events[i].data.fd, NULL);
+					DEBUG_LOG("Close socket[%d]\n", sockFd);
 				}
+				DEBUG_LOG("Read line[%d]\n", line);
+				epoll_event registEvent;
+				registEvent.data.fd = sockFd; // 设置用于写操作的文件描述符
+				registEvent.events = EPOLLOUT | EPOLLET; // 设置用于注册的写操作事件
+				epoll_ctl(epfd, EPOLL_CTL_MOD, sockFd, &registEvent); // 修改sockFd上要处理的事件为EPOLLOUT
+
+				CbContext context;
+				context.data = line;
+				context.socketfd = sockFd;
+				mCb(context);
+			}
+			else if (events[i].events & EPOLLOUT) // 如果有数据发送
+			{
+				char line[MAXLINE];
+				int sockFd = events[i].data.fd;
+				writeAll(sockFd, line, strnlen(line, sizeof(line)));
+				epoll_event registEvent;
+				registEvent.data.fd = sockFd; // 设置用于读操作的文件描述符
+				registEvent.events = EPOLLIN | EPOLLET; // 设置用于注册的读操作事件
+				epoll_ctl(epfd, EPOLL_CTL_MOD, sockFd, &registEvent); // 修改sockFd上要处理的事件为EPOLIN
 			}
 		}
+
 		return 0;
 	}
 
