@@ -14,7 +14,8 @@ void RegistUserInfo::process()
 
 void RegistUserInfo::packResponse(CWSLib::Param& output)
 {
-	///TODO...
+	output.setValue("error_code", 0);
+	output.setString("error_msg", "OK");
 }
 
 REG_TYPE(RegistUserInfo, regist_user_info);

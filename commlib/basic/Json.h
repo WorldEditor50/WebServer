@@ -115,6 +115,7 @@ namespace CWSLib
 		{
 			return JNodeType::STRING;
 		}
+		virtual std::string asString() { return mVal; }
 
 	private:
 		std::string mVal;

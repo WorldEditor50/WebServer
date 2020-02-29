@@ -22,7 +22,7 @@ int CWSLib::Json::parse(const std::string& jsonString)
 	for (size_t i = 0; i < length; ++i)
 	{
 		char ch = jsonString.at(i);
-		std::cout << "[" << i << "]" << ch << "\n";
+		//std::cout << "[" << i << "]" << ch << "\n";
 		switch (ch)
 		{
 		case '{':
@@ -185,6 +185,10 @@ int CWSLib::Json::parse(const std::string& jsonString)
 		}
 	}
 
+	if (nodeStack.empty())
+	{
+		return -1;
+	}
 	mRootNode.reset(nodeStack.front().release());
 	mRootNode->setLevel(0);
 	return 0;

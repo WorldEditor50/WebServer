@@ -10,6 +10,7 @@
 #include "commlib/thread_pool/ThreadPool.h"
 #include "commlib/thread_pool/BaseJob.h"
 #include "commlib/basic/CommonSingleton.h"
+#include "commlib/app/MacroAssemble.h"
 
 /*
 Protocol Introduction:
@@ -24,6 +25,8 @@ struct ProtoData
 {
 	std::string apiName;
 	std::string paramList;
+
+	int sockFd;
 
 	void toJson(CWSLib::JsonNode& node)
 	{

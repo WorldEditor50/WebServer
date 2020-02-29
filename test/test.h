@@ -9,6 +9,7 @@ namespace CWSTest
     void threadPool();
     void log();
     void json();
+    void client();
 }
 
 #endif // !__TEST_H__

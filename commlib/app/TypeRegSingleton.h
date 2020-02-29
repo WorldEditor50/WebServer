@@ -93,7 +93,7 @@ public:
 	}
 };
 
-#define REG_TYPE(TypeName, __cb_func) TypeRegCaller<TypeName> caller_##__cb_func(#__cb_func)
+#define REG_TYPE(TypeName, __cb_func) static TypeRegCaller<TypeName> caller_##__cb_func(#__cb_func)
 
 #endif // !__TYPE_REG_SINGLETON_H__
 

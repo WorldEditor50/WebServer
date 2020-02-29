@@ -83,8 +83,6 @@ namespace CWSLib
 					int connFd = accept(listenFd, (sockaddr*)&clientAddr, &addrSize);
 					if (-1 == connFd)
 					{
-						//perror("Accept");
-						ERROR_LOG("Accept error");
 						break;
 					}
 					int ret = getnameinfo((sockaddr*)&clientAddr, sizeof(clientAddr),
@@ -139,7 +137,7 @@ namespace CWSLib
 					//epoll_ctl(epfd, EPOLL_CTL_DEL, events[i].data.fd, NULL);
 					DEBUG_LOG("Close socket[%d]\n", sockFd);
 				}
-				DEBUG_LOG("Read line[%d]\n", line);
+				DEBUG_LOG("Read line[%s]\n", line);
 				epoll_event registEvent;
 				registEvent.data.fd = sockFd; // 设置用于写操作的文件描述符
 				registEvent.events = EPOLLOUT | EPOLLET; // 设置用于注册的写操作事件
@@ -152,9 +150,9 @@ namespace CWSLib
 			}
 			else if (events[i].events & EPOLLOUT) // 如果有数据发送
 			{
-				char line[MAXLINE];
+				//char line[MAXLINE];
 				int sockFd = events[i].data.fd;
-				writeAll(sockFd, line, strnlen(line, sizeof(line)));
+				//writeAll(sockFd, line, strnlen(line, sizeof(line)));
 				epoll_event registEvent;
 				registEvent.data.fd = sockFd; // 设置用于读操作的文件描述符
 				registEvent.events = EPOLLIN | EPOLLET; // 设置用于注册的读操作事件
@@ -182,7 +180,7 @@ namespace CWSLib
 		}
 	}
 
-	int32_t EventDispatcher::readAll(int32_t sock, char* buf, size_t size)
+	int32_t readAll(int32_t sock, char* buf, size_t size)
 	{
 		int32_t recvSum = 0;
 		int32_t recvCnt = recv(sock, buf, size, MSG_DONTWAIT | MSG_PEEK);
@@ -206,7 +204,7 @@ namespace CWSLib
 		return recvSum;
 	}
 
-	int32_t EventDispatcher::writeAll(int32_t sock, char* buf, size_t size)
+	int32_t writeAll(int32_t sock, char* buf, size_t size)
 	{
 		int32_t sendCnt = 0;
 		while (true)

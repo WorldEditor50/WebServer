@@ -7,6 +7,10 @@
 
 namespace CWSLib
 {
+	int32_t readAll(int32_t sock, char* buf, size_t size);
+
+	int32_t writeAll(int32_t sock, char* buf, size_t size);
+
 	struct CbContext
 	{
 		std::string data;
@@ -29,12 +33,7 @@ namespace CWSLib
 		int32_t wait();
 
 	private:
-
 		void setNonblocking(int32_t sock);
-
-		int32_t readAll(int32_t sock, char* buf, size_t size);
-
-		int32_t writeAll(int32_t sock, char* buf, size_t size);
 
 	private:
 		int epfd;

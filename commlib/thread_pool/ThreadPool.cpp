@@ -17,7 +17,7 @@ void CWSLib::ThreadPool::init(int initThreadNum, int maxTaskNum, int maxThreadNu
     // 初始化工作线程
     for (int i = 0; i < initThreadNum; ++i)
     {
-        std::thread thd([&]() {
+        std::thread thd([=]() {
             this->work();
             });
         thd.detach();

@@ -7,9 +7,9 @@ commlib|some basic tools
 frame|utilities for server frame
 src|classes of business  
 ## <2> How to build?
-./make.sh -- To build new binary file  
+"./make.sh" or "make" -- To build new binary file  
 make clean -- To clean all object files  
-make client -- To build client file  
+make cws_client -- To build client file  
 ## <3> How to start develope?
 ///TODO...
 ## <4> Level of internal dependency
