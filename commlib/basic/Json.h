@@ -10,6 +10,9 @@
 
 namespace CWSLib
 {
+	class JListValue;
+	class JsonNode;
+
 	enum class JNodeType
 	{
 		NUMERIC,
@@ -32,6 +35,15 @@ namespace CWSLib
 		int getLevel() { return mLevel; }
 
 		static std::string getTabStr(int level);
+
+		virtual JValue* getElement(const std::string& key) { return nullptr; }
+		virtual int asInt() { return 0; }
+		virtual long long asLongLong() { return 0; }
+		virtual bool asBool() { return false; }
+		virtual double asDouble() { return 0.0; }
+		virtual std::string asString() { return std::string(""); }
+		virtual JListValue* asList() { return nullptr; }
+		virtual JsonNode* asNode() { return nullptr; }
 
 	private:
 		int mLevel;
@@ -56,6 +68,10 @@ namespace CWSLib
 			return JNodeType::NUMERIC;
 		}
 
+		virtual int asInt() { return (T)mVal; }
+		virtual long long asLongLong() { return (T)mVal; }
+		virtual double asDouble() { return (T)mVal; }
+
 	private:
 		T mVal;
 	};
@@ -77,6 +93,8 @@ namespace CWSLib
 			return JNodeType::BOOL;
 		}
 
+		virtual bool asBool() { return mVal; }
+
 	private:
 		bool mVal;
 	};
@@ -97,6 +115,7 @@ namespace CWSLib
 		{
 			return JNodeType::STRING;
 		}
+		virtual std::string asString() { return mVal; }
 
 	private:
 		std::string mVal;
@@ -142,6 +161,8 @@ namespace CWSLib
 			}
 			mList.push_back(std::unique_ptr<JValue>(listVal));
 		}
+
+		virtual JListValue* asList() { return this; }
 
 	private:
 		template<typename NumericType>
@@ -204,6 +225,8 @@ namespace CWSLib
 		{
 			return JNodeType::STRUCT;
 		}
+		virtual JValue* getElement(const std::string& key);
+		virtual JsonNode* asNode() { return this; }
 
 	private:
 		template<typename NumericType>
@@ -252,6 +275,16 @@ namespace CWSLib
 			item.toJson(*node);
 		}
 
+		JValue& operator[](const std::string& key)
+		{
+			JValue* node = mRootNode->getElement(key);
+			if (!node)
+			{
+				return emptyNode;
+			}
+			return *node;
+		}
+
 		static bool isDouble(const std::string& input);
 		static bool isLonglong(const std::string& input);
 		static bool isInt(const std::string& input);
@@ -268,6 +301,7 @@ namespace CWSLib
 
 	private:
 		std::unique_ptr<JValue> mRootNode;
+		JsonNode emptyNode;
 	};
 
 	template<typename Struct>

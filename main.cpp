@@ -1,27 +1,32 @@
 
 
 #include <iostream>
+
 #include "test/test.h"
+#include "frame/Server.h"
+
+#ifdef CLIENT_MAIN
 
 int main(int argc, char** argv)
 {
 	//CWSTest::helloWorld();
 	//CWSTest::threadPool();
 	//CWSTest::log();
-	CWSTest::json();
+	CWSTest::client();
 	return 0;
 }
 
-#ifdef __VERSION_FOR_RELEASE__
+#else
 
 int main(int argc, char** argv)
 {
 	//CWSTest::helloWorld();
 	//CWSTest::threadPool();
 	//CWSTest::log();
-	CWSTest::json();
+	//CWSTest::json();
+	CWSLib::Server server;
+	server.run();
 	return 0;
 }
 
-#endif // __VERSION_FOR_RELEASE__
-
+#endif // CLIENT_MAIN

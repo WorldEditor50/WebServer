@@ -1,12 +1,17 @@
 
 
+#include <iostream>
+#include <cstring>
+#include <unistd.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
 #include "test.h"
 #include "TestHeader.h"
 #include "TestTask.h"
 #include "commlib/thread_pool/ThreadPool.h"
 #include "commlib/app/MacroAssemble.h"
-
-#include <iostream>
 
 void CWSTest::helloWorld()
 {
@@ -95,6 +100,34 @@ void CWSTest::json()
 	CWSLib::Json psJson;
 	psJson.parse(json.toString());
 	std::cout << psJson.toFmtString() << "\n";
+}
+
+void CWSTest::client()
+{
+	struct sockaddr_in servaddr;
+
+	int sockfd = socket(AF_INET, SOCK_STREAM, 0);
+	bzero(&servaddr, sizeof(servaddr));
+	servaddr.sin_family = AF_INET;
+	inet_pton(AF_INET, "127.0.0.1", &servaddr.sin_addr);
+	servaddr.sin_port = htons(12000);
+	connect(sockfd, (struct sockaddr*) & servaddr, sizeof(servaddr));
+	while (true)
+	{
+		std::string str;
+		char buf[1000] = { 0 };
+		std::cout << "Say: \n";
+		std::cin >> str;
+		if (str == "quit" || str == "exit")
+		{
+			break;
+		}
+		write(sockfd, str.c_str(), str.length());
+		int n = read(sockfd, buf, sizeof(buf));
+		std::cout << "Server: " << buf << "\n";
+	}
+	
+	close(sockfd);
 }
 
 
