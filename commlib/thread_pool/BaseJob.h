@@ -5,12 +5,12 @@
 
 namespace CWSLib
 {
-    class BaseJob
-    {
-    public:
-        virtual ~BaseJob() {};
-        virtual void excute() = 0;
-    };
+	class BaseJob
+	{
+	public:
+		virtual ~BaseJob() {};
+		virtual void excute() = 0;
+	};
 }
 
 #endif // !__BASE_JOB_H__

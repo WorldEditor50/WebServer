@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+import "common_define.proto";
+package cws.user;
+option cc_generic_services = true;
+
+message user_info_regist_rqst {
+	string user_name = 1;
+	string phone_number = 2;
+	cws.common.Gender gender = 3;
+	string birthday = 4;
+	string password = 5;
+}
+message user_info_regist_resp {
+	cws.common.ReturnMsg ret_info = 1;
+	string user_id = 2;
+}
+
+message user_info_login_rqst {
+	string user_id = 1;
+	string password = 2;
+}
+message user_info_login_resp {
+	cws.common.ReturnMsg ret_info = 1;
+	string session_key = 2;
+}
+
+service UserService {
+	rpc user_info_regist (user_info_regist_rqst) returns (user_info_regist_resp);
+	rpc user_info_login (user_info_login_rqst) returns (user_info_login_resp);
+}
