@@ -1,4 +1,5 @@
 # CWS WebServer
+Cream Web Server  
 A web server frame by C++11  
 ## <1> What each directory for?
 directories|for  
@@ -7,12 +8,18 @@ commlib|some basic tools
 frame|utilities for server frame
 src|classes of business  
 ## <2> How to build?
-mkdir build
-cd build
-cmake ..
-make
++ install third-party libs:
+  + protobuf
++ start build by the following steps:  
+`mkdir build`  
+`cd build`  
+`cmake ..`  
+`make`
 ## <3> How to start develope?
-///TODO...
+Start by the following steps:  
++ replace the *.proto in src/ by your own
++ cmake and get the stubs in build/stubs/
++ TODO...
 ## <4> Level of internal dependency
 level|directories  
 :--:|--  
