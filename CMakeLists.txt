@@ -20,15 +20,15 @@ INCLUDE_DIRECTORIES("${PROJECT_ROOT_PATH}")
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Protobuf REQUIRED)
 find_package(Threads REQUIRED)
-include_directories(/usr/include/mysql)
-include_directories(/usr/local/include/mysql++)
+#include_directories(/usr/include/mysql)
+#include_directories(/usr/local/include/mysql++)
 
 target_include_directories(cream_web_server
 	PRIVATE ${PROTOBUF_INCLUDE_DIR}
 )
 target_link_libraries(cream_web_server
 	PRIVATE ${PROTOBUF_LIBRARY}
-	PRIVATE mysqlpp
+	#PRIVATE mysqlpp
 	PRIVATE Threads::Threads
 	PUBLIC ${COMM_LIB}
 )
