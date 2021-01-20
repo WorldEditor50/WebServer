@@ -4,23 +4,12 @@
 #define __EVENT_DISPATCHER_H__
 
 #include <string>
+#include <functional>
+
+#include "Socket.h"
 
 namespace CWSLib
 {
-	int32_t readAll(int32_t sock, char* buf, size_t size);
-
-	int32_t writeAll(int32_t sock, char* buf, size_t size);
-
-	struct CbContext
-	{
-		std::string data;
-		int socketfd;
-
-		static void close(int socketfd);
-	};
-
-	typedef void (*__svcCallback)(CWSLib::CbContext&);
-
 	class EventDispatcher
 	{
 	public:
@@ -28,19 +17,20 @@ namespace CWSLib
 
 		~EventDispatcher();
 
-		int32_t init(__svcCallback cbFunc);
+		int32_t init(int port, std::function<void(CWSLib::Socket&, const std::string&)> cbFunc);
 
-		int32_t wait();
-
-	private:
-		void setNonblocking(int32_t sock);
+		int32_t tick();
 
 	private:
-		int epfd;
-		int listenFd;
+
+	private:
+		//int epfd;
+		//int listenFd;
+		Socket m_epSock;
+		Socket m_listenSock;
 		int timeout;
 		int maxEvent;
-		__svcCallback mCb;
+		std::function<void(CWSLib::Socket&, const std::string&)> mCb;
 	};
 }
 

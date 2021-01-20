@@ -23,7 +23,7 @@ namespace CwsFrame
 
     void Server::Run()
     {
-        dispatcher.init([](CWSLib::CbContext& context) {
+        dispatcher.init(9091, [](CWSLib::Socket& sock, const std::string& input) {
             ///TODO...
             });
         CWSLib::ThreadPool& thdPool = CWSLib::CommSingleton<CWSLib::ThreadPool>::instance();
@@ -31,7 +31,7 @@ namespace CwsFrame
         NORMAL_LOG("Finish init server");
         while (true)
         {
-            if (dispatcher.wait() < 0)
+            if (dispatcher.tick() < 0)
             {
                 break;
             }
