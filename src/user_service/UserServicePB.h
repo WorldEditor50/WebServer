@@ -5,7 +5,7 @@
 
 #include <build/stubs/user_service.pb.h>
 
-class UserService : public cws::user::UserService
+class UserServicePB : public cws::user::UserService
 {
     void user_info_regist(google::protobuf::RpcController* controller,
         const ::cws::user::user_info_regist_rqst* request,

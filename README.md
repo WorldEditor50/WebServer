@@ -7,9 +7,11 @@ directories|for
 commlib|some basic tools  
 frame|utilities for server frame
 src|classes of business  
+test|functions and classes of test
 ## <2> How to build?
 + install third-party libs:
   + protobuf
+  + mysqlclient
 + start build by the following steps:  
 `mkdir build`  
 `cd build`  
