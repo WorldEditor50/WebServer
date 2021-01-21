@@ -1,8 +1,10 @@
 
 
-#include "CwsServer.h"
 #include "commlib/app/MacroAssemble.h"
 #include "commlib/thread_pool/ThreadPool.h"
+
+#include "CwsServer.h"
+#include "CwsJobImpl.h"
 
 namespace CwsFrame
 {
@@ -23,11 +25,11 @@ namespace CwsFrame
 
     void Server::Run()
     {
-        dispatcher.init(9091, [](CWSLib::Socket& sock, const std::string& input) {
-            ///TODO...
-            });
         CWSLib::ThreadPool& thdPool = CWSLib::CommSingleton<CWSLib::ThreadPool>::instance();
         thdPool.init(5, 100, 20);
+        dispatcher.init([&](CWSLib::Socket& sock, const std::string& input) {
+            thdPool.addTask(new JobImpl(sock, input));
+        });
         NORMAL_LOG("Finish init server");
         while (true)
         {

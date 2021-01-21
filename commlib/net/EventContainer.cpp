@@ -1,0 +1,93 @@
+
+
+#include "EventContainer.h"
+#include "commlib/app/MacroAssemble.h"
+
+#include <netinet/in.h>
+#include <netdb.h>
+#include <arpa/inet.h>
+#include <cstring>
+
+namespace CWSLib {
+	EventContainer::EventContainer()
+	{
+	}
+
+	int32_t EventContainer::Init(int32_t listenFd)
+	{
+		m_listenFd = listenFd;
+		m_epfd = epoll_create(256);
+		epoll_event initEvent;
+		initEvent.data.fd = listenFd;
+		initEvent.events = EPOLLIN | EPOLLET; // 设置要处理的事件类型
+		epoll_ctl(m_epfd, EPOLL_CTL_ADD, listenFd, &initEvent); // 注册epoll事件
+		return m_epfd;
+	}
+
+	int32_t EventContainer::Wait()
+	{
+		// 等待epoll事件的发生
+		int fdNum = epoll_wait(m_epfd, events, maxEvent, timeout);
+		// 处理所发生的所有事件
+		for (int i = 0; i < fdNum; ++i)
+		{
+			if (events[i].data.fd == m_listenFd)
+			{
+				// 由于采用了边缘触发模式，这里需要使用循环，保证所有新的连接都被注册
+				for (; ; )
+				{
+					int connFd = m_listenFunc();
+					if (connFd < 0)
+					{
+						ERROR_LOG("Accept new socket failed");
+						return -1;
+					}
+					epoll_event registEvent;
+					registEvent.data.fd = connFd; // 设置用于读操作的文件描述符
+					registEvent.events = EPOLLIN | EPOLLET; // 设置用于注册的读操作事件
+					// 为新accept的 file describe 设置epoll事件
+					if (-1 == epoll_ctl(m_epfd, EPOLL_CTL_ADD, connFd, &registEvent))
+					{
+						ERROR_LOG("epoll_ctl");
+						return -1;
+					}
+				}
+			}
+			else if (events[i].events & EPOLLIN)
+			{
+				//如果是已经连接的用户，并且收到数据，那么进行读入。
+				int ret = m_readFunc(events[i].data.fd);
+				if (ret < 0)
+				{
+					DEBUG_LOG("Read from [%d] failed.", events[i].data.fd);
+					events[i].data.fd = -1;
+				}
+				epoll_event registEvent;
+				registEvent.data.fd = events[i].data.fd; // 设置用于写操作的文件描述符
+				registEvent.events = EPOLLOUT | EPOLLET; // 设置用于注册的写操作事件
+				epoll_ctl(m_epfd, EPOLL_CTL_MOD, events[i].data.fd, &registEvent); // 修改sockFd上要处理的事件为EPOLLOUT
+			}
+			else if (events[i].events & EPOLLOUT) // 如果有数据发送
+			{
+				int sockFd = events[i].data.fd;
+				epoll_event registEvent;
+				registEvent.data.fd = sockFd; // 设置用于读操作的文件描述符
+				registEvent.events = EPOLLIN | EPOLLET; // 设置用于注册的读操作事件
+				epoll_ctl(m_epfd, EPOLL_CTL_MOD, sockFd, &registEvent); // 修改sockFd上要处理的事件为EPOLIN
+			}
+		}
+
+		return 0;
+	}
+
+	void EventContainer::OnListen(std::function<int32_t()> func)
+	{
+		m_listenFunc = func;
+	}
+
+	void EventContainer::OnRead(std::function<int32_t(int32_t)> func)
+	{
+		m_readFunc = func;
+	}
+
+}

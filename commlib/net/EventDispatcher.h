@@ -7,6 +7,8 @@
 #include <functional>
 
 #include "Socket.h"
+#include "EventContainer.h"
+#include "Acceptor.h"
 
 namespace CWSLib
 {
@@ -17,20 +19,15 @@ namespace CWSLib
 
 		~EventDispatcher();
 
-		int32_t init(int port, std::function<void(CWSLib::Socket&, const std::string&)> cbFunc);
+		int32_t init(std::function<void(Socket&, const std::string&)> func);
 
 		int32_t tick();
 
 	private:
 
 	private:
-		//int epfd;
-		//int listenFd;
-		Socket m_epSock;
-		Socket m_listenSock;
-		int timeout;
-		int maxEvent;
-		std::function<void(CWSLib::Socket&, const std::string&)> mCb;
+		EventContainer container;
+		Acceptor acceptor;
 	};
 }
 

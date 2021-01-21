@@ -27,7 +27,9 @@ file(GLOB protobuf_files
 	${PROTO_PATH}/*.proto
 )
 LIST(APPEND PROTO_FLAGS -I${PROTO_PATH})
-file(MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/build/stubs)
+if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/build/stubs)
+	file(MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/build/stubs)
+endif()
 FOREACH(FIL ${protobuf_files})
 	message("Dealing with ${FIL}")
 	string(REGEX MATCH "^/.*/([^ ]*)/([^ ]*)\.proto$" proto_name ${FIL})

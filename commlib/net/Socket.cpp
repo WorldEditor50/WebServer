@@ -9,17 +9,27 @@ namespace CWSLib
 {
 	Socket::Socket()
 	{
-		m_fd = socket(AF_INET, SOCK_STREAM, 0);
+		
 	}
 
 	Socket::Socket(int32_t fd)
 	{
-		m_fd = fd;
+		Init(fd);
 	}
 
 	Socket::~Socket()
 	{
 		Close();
+	}
+
+	void Socket::Init(int32_t fd)
+	{
+		m_fd = fd;
+	}
+
+	void Socket::Init()
+	{
+		m_fd = socket(AF_INET, SOCK_STREAM, 0);
 	}
 
 	int32_t Socket::GetFd()

@@ -17,6 +17,8 @@ namespace CWSLib
 		Socket(int32_t fd);
 		~Socket();
 
+		void Init(int32_t fd);
+		void Init();
 		int32_t GetFd();
 		void Close();
 		int32_t SetNonblocking();
