@@ -27,41 +27,32 @@ namespace CWSLib
 	{
 	}
 
-	int32_t EventDispatcher::init(std::function<void(Socket&, const std::string&)> func)
+	int32_t EventDispatcher::init(std::function<void(std::shared_ptr<Socket>)> func)
 	{
-		int32_t lsFd = acceptor.Init("127.0.0.1", 9091);
-		container.Init(lsFd);
+		acceptor.Init();
+		acceptor.Bind("127.0.0.1", 9091);
+		container.Init(acceptor.GetFd());
 		container.OnListen([&]() {
-			std::shared_ptr<Socket> sock = acceptor.Accept();
-			if (!sock)
-			{
-				return -1;
-			}
-			return sock->GetFd();
+			return acceptor.Accept();
 		});
-		container.OnRead([func](int32_t fd) {
-			Socket sock(fd);
-			std::string out;
-			int32_t readSize = sock.ReadAll(out);
-			if (readSize < 0 && errno == ECONNRESET)
-			{
-				sock.Close();
-				return -1;
-			}
-			else if (readSize == 0)
-			{
-				sock.Close();
-				return -1;
-			}
-			func(sock, out);
+		container.OnRead([func](std::shared_ptr<Socket> sock) {
+			func(sock);
 			return 0;
 		});
 		return 0;
 	}
 
-	int32_t EventDispatcher::tick()
+	int32_t EventDispatcher::wait()
 	{
-		return container.Wait();
+		while (true)
+		{
+			if (container.Wait())
+			{
+				ERROR_LOG("Container wait error.");
+				break;
+			}
+		}
+		return 0;
 	}
 }
 

@@ -5,10 +5,10 @@
 
 #include <string>
 #include <functional>
+#include <memory>
 
 #include "Socket.h"
 #include "EventContainer.h"
-#include "Acceptor.h"
 
 namespace CWSLib
 {
@@ -19,15 +19,15 @@ namespace CWSLib
 
 		~EventDispatcher();
 
-		int32_t init(std::function<void(Socket&, const std::string&)> func);
+		int32_t init(std::function<void(std::shared_ptr<Socket>)> func);
 
-		int32_t tick();
+		int32_t wait();
 
 	private:
 
 	private:
 		EventContainer container;
-		Acceptor acceptor;
+		Socket acceptor;
 	};
 }
 

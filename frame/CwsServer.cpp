@@ -8,12 +8,12 @@
 
 namespace CwsFrame
 {
-    int32_t Server::AddService(const std::string& serviceName, google::protobuf::Service* servicePtr)
+    int32_t Server::AddService(const std::string& serviceName, Service* servicePtr)
     {
         if (m_serviceMap.find(serviceName) != m_serviceMap.end())
         {
             NORMAL_LOG("Adding service[%s]", serviceName.c_str());
-            m_serviceMap.insert(std::make_pair(serviceName, std::shared_ptr<google::protobuf::Service>(servicePtr)));
+            m_serviceMap.insert(std::make_pair(serviceName, std::shared_ptr<Service>(servicePtr)));
             return 0;
         }
         else
@@ -23,21 +23,32 @@ namespace CwsFrame
         }
     }
 
+    std::shared_ptr<Service> Server::GetService(const std::string serviceName)
+    {
+        auto itor = m_serviceMap.find(serviceName);
+        if (itor == m_serviceMap.end())
+        {
+            std::shared_ptr<Service> service = std::shared_ptr<Service>(new Service(serviceName));
+            m_serviceMap.insert(std::make_pair(serviceName, service));
+            return service;
+        }
+        else
+        {
+            return itor->second;
+        }
+    }
+
     void Server::Run()
     {
         CWSLib::ThreadPool& thdPool = CWSLib::CommSingleton<CWSLib::ThreadPool>::instance();
         thdPool.init(5, 100, 20);
-        dispatcher.init([&](CWSLib::Socket& sock, const std::string& input) {
-            thdPool.addTask(new JobImpl(sock, input));
+        dispatcher.init([&](std::shared_ptr<CWSLib::Socket> sock) {
+            auto job = CJobFactory::instance().create();
+            job->Init(sock);
+            thdPool.addTask(job);
         });
         NORMAL_LOG("Finish init server");
-        while (true)
-        {
-            if (dispatcher.tick() < 0)
-            {
-                break;
-            }
-        }
+        dispatcher.wait();
     }
 
 }

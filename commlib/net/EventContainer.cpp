@@ -11,6 +11,8 @@
 namespace CWSLib {
 	EventContainer::EventContainer()
 	{
+		maxEvent = 100;
+		timeout = 200;
 	}
 
 	int32_t EventContainer::Init(int32_t listenFd)
@@ -36,7 +38,9 @@ namespace CWSLib {
 				// 由于采用了边缘触发模式，这里需要使用循环，保证所有新的连接都被注册
 				for (; ; )
 				{
-					int connFd = m_listenFunc();
+					std::shared_ptr<Socket> sock = m_listenFunc();
+					int connFd = sock->GetFd();
+					m_sockMap.insert(std::make_pair(connFd, sock));
 					if (connFd < 0)
 					{
 						ERROR_LOG("Accept new socket failed");
@@ -55,8 +59,14 @@ namespace CWSLib {
 			}
 			else if (events[i].events & EPOLLIN)
 			{
-				//如果是已经连接的用户，并且收到数据，那么进行读入。
-				int ret = m_readFunc(events[i].data.fd);
+				// 如果是已经连接的用户，并且收到数据，那么进行读入。
+				auto itor = m_sockMap.find(events[i].data.fd);
+				if (itor == m_sockMap.end())
+				{
+					ERROR_LOG("fd [%d] not cached.", events[i].data.fd);
+					return -1;
+				}
+				int ret = m_readFunc(itor->second);
 				if (ret < 0)
 				{
 					DEBUG_LOG("Read from [%d] failed.", events[i].data.fd);
@@ -80,12 +90,12 @@ namespace CWSLib {
 		return 0;
 	}
 
-	void EventContainer::OnListen(std::function<int32_t()> func)
+	void EventContainer::OnListen(std::function<std::shared_ptr<Socket>()> func)
 	{
 		m_listenFunc = func;
 	}
 
-	void EventContainer::OnRead(std::function<int32_t(int32_t)> func)
+	void EventContainer::OnRead(std::function<int32_t(std::shared_ptr<Socket>)> func)
 	{
 		m_readFunc = func;
 	}

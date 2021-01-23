@@ -1,12 +1,19 @@
 
 
-#include "Socket.h"
-
 #include <unistd.h>
 #include <fcntl.h>
+#include <netinet/in.h>
+#include <netdb.h>
+#include <arpa/inet.h>
+#include <cstring>
+
+#include "Socket.h"
+#include "commlib/app/MacroAssemble.h"
 
 namespace CWSLib
 {
+	const static int LISTENQ = 20;
+
 	Socket::Socket()
 	{
 		
@@ -37,10 +44,23 @@ namespace CWSLib
 		return m_fd;
 	}
 
+	int32_t Socket::GetPort()
+	{
+		return m_port;
+	}
+
+	std::string Socket::GetHost()
+	{
+		return m_host;
+	}
+
 	void Socket::Close()
 	{
 		if (m_fd != 0)
+		{
+			NORMAL_LOG("Closing socket[%s:%d]", m_host.c_str(), m_port);
 			close(m_fd);
+		}
 	}
 
 	int32_t Socket::SetNonblocking()
@@ -85,6 +105,20 @@ namespace CWSLib
 		return recvSum;
 	}
 
+	int32_t Socket::Read(std::string& out, size_t length)
+	{
+		char* buf = new char[length + 1];
+		int32_t readLen = read(m_fd, buf, length);
+		out = buf;
+		delete[] buf;
+		return readLen;
+	}
+
+	int32_t Socket::Read(char* buf, size_t length)
+	{
+		return read(m_fd, buf, length);
+	}
+
 	int32_t Socket::WriteAll(const std::string& content)
 	{
 		int32_t sendCnt = 0;
@@ -104,6 +138,45 @@ namespace CWSLib
 		}
 		//write(sock, buf, size);
 		return sendCnt;
+	}
+
+	void Socket::Bind(const std::string host, int32_t port)
+	{
+		sockaddr_in serverAddr;
+		bzero(&serverAddr, sizeof(serverAddr));
+		serverAddr.sin_family = AF_INET;
+		inet_aton(host.c_str(), &(serverAddr.sin_addr));
+
+		serverAddr.sin_port = htons(port);
+		bind(m_fd, (sockaddr*)&serverAddr, sizeof(serverAddr));
+		listen(m_fd, LISTENQ);
+	}
+
+	std::shared_ptr<Socket> Socket::Accept()
+	{
+		sockaddr_in clientAddr = { 0 };
+		socklen_t addrSize = sizeof(clientAddr);
+		int connFd = accept(m_fd, (sockaddr*)&clientAddr, &addrSize);
+		if (-1 == connFd)
+		{
+			return std::shared_ptr<Socket>();
+		}
+
+		char hostBuf[NI_MAXHOST]; // IPµÿ÷∑ª∫¥Ê
+		char portBuf[NI_MAXSERV]; // PORTª∫¥Ê
+		int ret = getnameinfo((sockaddr*)&clientAddr, sizeof(clientAddr),
+			hostBuf, sizeof(hostBuf) / sizeof(hostBuf[0]),
+			portBuf, sizeof(portBuf) / sizeof(portBuf[0]),
+			NI_NUMERICHOST | NI_NUMERICSERV);
+		if (!ret)
+		{
+			DEBUG_LOG("New connection: host = %s, port = %s\n", hostBuf, portBuf);
+		}
+		std::shared_ptr<Socket> newConn = std::shared_ptr<Socket>(new Socket(connFd));
+		newConn->SetNonblocking();
+		newConn->m_host = hostBuf;
+		newConn->m_port = std::atoi(portBuf);
+		return newConn;
 	}
 
 }

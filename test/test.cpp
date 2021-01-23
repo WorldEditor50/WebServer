@@ -12,11 +12,14 @@
 #include "TestTask.h"
 #include "commlib/thread_pool/ThreadPool.h"
 #include "commlib/app/MacroAssemble.h"
+#include "commlib/app/TypeRegSingleton.h"
 
 void CWSTest::helloWorld()
 {
 	std::cout << "Hello world!\n";
 }
+
+REG_TYPE_DEFAULT(CWSLib::BaseJob, TestTask, test_task);
 
 void CWSTest::threadPool()
 {

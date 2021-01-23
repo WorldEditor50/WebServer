@@ -14,7 +14,7 @@
 class TestTask : public CWSLib::BaseJob
 {
 public:
-    virtual void excute()
+    virtual void execute() override
     {
         srand((unsigned int)time(NULL));
         std::this_thread::sleep_for(std::chrono::milliseconds(rand() % 300));
