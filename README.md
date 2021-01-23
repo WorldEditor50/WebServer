@@ -1,4 +1,4 @@
-# CWS WebServer
+# Cream Web Server
 Cream Web Server  
 A web server frame by C++11  
 ## <1> What each directory for?
@@ -8,20 +8,21 @@ commlib|some basic tools
 frame|utilities for server frame
 src|classes of business  
 test|functions and classes of test
-## <2> How to build?
+## <2> How to start develope?
+Start by the following steps:  
++ `cd build && cmake ..` and get the stubs in build/stubs/
++ `cd src` and replace src/*.proto by your own
++ `mkdir <your service name>` and develope inside
++ When developing some common utils of business, just put them into proj_comm
+## <3> How to build?
 + install third-party libs:
   + protobuf
   + mysqlclient
-+ start build by the following steps:  
-`mkdir build`  
++ start build within the following steps:  
+`mkdir build` if not exists  
 `cd build`  
 `cmake ..`  
 `make`
-## <3> How to start develope?
-Start by the following steps:  
-+ replace the *.proto in src/ by your own
-+ cmake and get the stubs in build/stubs/
-+ TODO...
 ## <4> Level of internal dependency
 level|directories  
 :--:|--  

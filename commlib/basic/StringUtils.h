@@ -15,6 +15,9 @@ namespace String
 	std::string format(const char* fmt, ...);
 
 	void split(std::vector<std::string>& strList, const std::string& src, char spliter);
+
+	std::string baseName(const std::string& fileName);
+
 }
 }
 

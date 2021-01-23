@@ -1,8 +1,17 @@
 cmake_minimum_required (VERSION 3.16)
-#set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-project (cream_web_server VERSION 0.10 LANGUAGES CXX)
 
-LIST(APPEND SRC_DIR commlib frame src test)
+if(NOT SET_MY_SERVER_NAME)
+	SET(SET_MY_SERVER_NAME cream_web_server)
+endif()
+
+if(NOT SET_MY_CLIENT_NAME)
+	SET(SET_MY_CLIENT_NAME cream_web_client)
+endif()
+
+project (${SET_MY_SERVER_NAME} VERSION 0.1.0 LANGUAGES CXX)
+add_compile_options(-std=c++11)
+
+LIST(APPEND SRC_DIR commlib frame)
 foreach(cur_dir ${SRC_DIR})
 	file(GLOB_RECURSE SRCS ${cur_dir}/*.cpp)
 	file(GLOB_RECURSE HDRS ${cur_dir}/*.h)
@@ -10,9 +19,16 @@ foreach(cur_dir ${SRC_DIR})
 	LIST(APPEND SRC_LIST ${SRCS})
 	LIST(APPEND HDR_LIST ${HDRS} ${HPPS})
 endforeach()
-add_compile_options(-std=c++11)
-add_executable(cream_web_server main.cpp ${SRC_LIST} ${HDR_LIST})
-install (TARGETS cream_web_server DESTINATION bin)
+add_library(cws_frame STATIC ${SRC_LIST} ${HDR_LIST})
+add_executable(${SET_MY_SERVER_NAME} main.cpp)
+install (TARGETS ${SET_MY_SERVER_NAME} DESTINATION bin)
+
+file(GLOB_RECURSE TEST_HPPS test/*.hpp)
+file(GLOB_RECURSE TEST_HDRS test/*.h)
+file(GLOB_RECURSE TEST_CPPS test/*.cpp)
+LIST(APPEND TEST_HDR ${TEST_HPPS} ${TEST_HDRS})
+LIST(APPEND TEST_SRC ${TEST_CPPS})
+add_executable(${SET_MY_CLIENT_NAME} ${TEST_HDR} ${TEST_SRC})
 
 SET(PROJECT_ROOT_PATH ".")   
 INCLUDE_DIRECTORIES("${PROJECT_ROOT_PATH}")
@@ -33,19 +49,37 @@ endif()
 FOREACH(FIL ${protobuf_files})
 	message("Dealing with ${FIL}")
 	string(REGEX MATCH "^/.*/([^ ]*)/([^ ]*)\.proto$" proto_name ${FIL})
-	list(APPEND proto_tar_headers ${PROTO_META_BASE_DIR}/${CMAKE_MATCH_2}.pb.h)
-	list(APPEND proto_tar_srcs ${PROTO_META_BASE_DIR}/${CMAKE_MATCH_2}.pb.cc)
+	list(APPEND BUSI_HDR ${PROTO_META_BASE_DIR}/${CMAKE_MATCH_2}.pb.h)
+	list(APPEND BUSI_SRC ${PROTO_META_BASE_DIR}/${CMAKE_MATCH_2}.pb.cc)
 	EXECUTE_PROCESS(
 		COMMAND ${PROTOBUF_PROTOC_EXECUTABLE} ${PROTO_FLAGS} --cpp_out=${PROTO_META_BASE_DIR} ${FIL}
     )
 ENDFOREACH()
-add_library(cws_proto STATIC ${proto_tar_headers} ${proto_tar_srcs})
+file(GLOB_RECURSE BUSI_HPPS src/*.hpp)
+file(GLOB_RECURSE BUSI_HDRS src/*.h)
+file(GLOB_RECURSE BUSI_CPPS src/*.cpp)
+LIST(APPEND BUSI_HDR ${BUSI_HPPS} ${BUSI_HDRS})
+LIST(APPEND BUSI_SRC ${BUSI_CPPS})
+add_library(cws_business STATIC ${BUSI_HDR} ${BUSI_SRC})
 
-target_include_directories(cream_web_server
+target_include_directories(${SET_MY_SERVER_NAME}
 	PRIVATE ${PROTOBUF_INCLUDE_DIR}
+	PUBLIC cws_frame
 )
-target_link_libraries(cream_web_server
+target_link_libraries(${SET_MY_SERVER_NAME}
 	PRIVATE ${PROTOBUF_LIBRARY}
 	PRIVATE Threads::Threads
-	PUBLIC cws_proto
+	PUBLIC cws_business
+	PUBLIC cws_frame
+)
+
+target_include_directories(${SET_MY_CLIENT_NAME}
+	PRIVATE ${PROTOBUF_INCLUDE_DIR}
+	PUBLIC cws_frame
+)
+target_link_libraries(${SET_MY_CLIENT_NAME}
+	PRIVATE ${PROTOBUF_LIBRARY}
+	PRIVATE Threads::Threads
+	PUBLIC cws_business
+	PUBLIC cws_frame
 )

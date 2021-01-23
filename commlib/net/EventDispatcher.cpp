@@ -33,7 +33,9 @@ namespace CWSLib
 		acceptor.Bind("127.0.0.1", 9091);
 		container.Init(acceptor.GetFd());
 		container.OnListen([&]() {
-			return acceptor.Accept();
+			std::shared_ptr<Socket> sock = acceptor.Accept();
+			sock->SetNonblocking();
+			return sock;
 		});
 		container.OnRead([func](std::shared_ptr<Socket> sock) {
 			func(sock);

@@ -18,6 +18,10 @@ int32_t UserInfoRegist::Execute()
 {
     NORMAL_LOG("User name[%s], password[%s]", m_request->user_name().c_str(), m_request->password().c_str());
     /// TODO...
+    
+    m_response->mutable_ret_info()->set_err_code(0);
+    m_response->mutable_ret_info()->set_err_msg("OK");
+    m_response->set_user_id("654321");
     return 0;
 }
 

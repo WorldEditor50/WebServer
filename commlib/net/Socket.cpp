@@ -79,6 +79,18 @@ namespace CWSLib
 		return 0;
 	}
 
+	int32_t Socket::Connect(const std::string& host, int32_t port)
+	{
+		struct sockaddr_in servaddr;
+		bzero(&servaddr, sizeof(servaddr));
+		servaddr.sin_family = AF_INET;
+		inet_pton(AF_INET, host.c_str(), &servaddr.sin_addr);
+		servaddr.sin_port = htons(port);
+		m_host = host;
+		m_port = port;
+		return connect(m_fd, (struct sockaddr*)&servaddr, sizeof(servaddr));
+	}
+
 	int32_t Socket::ReadAll(std::string& out)
 	{
 		char buf[MAX_BUF_SIZE] = { 0 };

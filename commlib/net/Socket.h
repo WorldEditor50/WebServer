@@ -25,6 +25,7 @@ namespace CWSLib
 		std::string GetHost();
 		void Close();
 		int32_t SetNonblocking();
+		int32_t Connect(const std::string& host, int32_t port);
 		int32_t ReadAll(std::string& out);
 		int32_t Read(std::string& out, size_t length);
 		int32_t Read(char* buf, size_t length);

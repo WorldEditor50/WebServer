@@ -5,6 +5,8 @@
 
 #include <google/protobuf/service.h>
 
+#include "commlib/net/Socket.h"
+
 namespace CwsFrame
 {
 	class Channel : public google::protobuf::RpcChannel
@@ -15,6 +17,11 @@ namespace CwsFrame
 			const google::protobuf::Message* request,
 			google::protobuf::Message* response,
 			google::protobuf::Closure* done) override;
+
+		void Init(const std::string& host, int32_t port);
+
+	private:
+		CWSLib::Socket m_sock;
 	};
 }
 

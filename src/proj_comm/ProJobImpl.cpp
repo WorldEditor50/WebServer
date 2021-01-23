@@ -67,7 +67,10 @@ void ProJobImpl::Response()
 {
 	auto response = m_method->GetResponse();
 	std::string output;
-	response->SerializePartialToString(&output);
+	std::string respStr = response->SerializeAsString();
+	size_t length = respStr.length();
+	output += (char*)&length;
+	output += respStr;
 	m_sock->WriteAll(output);
 }
 

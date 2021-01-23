@@ -3,6 +3,8 @@
 #ifndef __TEST_H__
 #define __TEST_H__
 
+#include "clients/UserInfoRegistClient.h"
+
 namespace CWSTest
 {
     void helloWorld();
