@@ -61,6 +61,12 @@ file(GLOB_RECURSE BUSI_CPPS src/*.cpp)
 LIST(APPEND BUSI_HDR ${BUSI_HPPS} ${BUSI_HDRS})
 LIST(APPEND BUSI_SRC ${BUSI_CPPS})
 add_library(cws_business STATIC ${BUSI_HDR} ${BUSI_SRC})
+target_include_directories(cws_business
+	PUBLIC cws_frame
+)
+target_link_libraries(cws_business
+	PUBLIC cws_frame
+)
 
 target_include_directories(${SET_MY_SERVER_NAME}
 	PRIVATE ${PROTOBUF_INCLUDE_DIR}
@@ -70,7 +76,6 @@ target_link_libraries(${SET_MY_SERVER_NAME}
 	PRIVATE ${PROTOBUF_LIBRARY}
 	PRIVATE Threads::Threads
 	PUBLIC cws_business
-	PUBLIC cws_frame
 )
 
 target_include_directories(${SET_MY_CLIENT_NAME}
@@ -81,5 +86,4 @@ target_link_libraries(${SET_MY_CLIENT_NAME}
 	PRIVATE ${PROTOBUF_LIBRARY}
 	PRIVATE Threads::Threads
 	PUBLIC cws_business
-	PUBLIC cws_frame
 )

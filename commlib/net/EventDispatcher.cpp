@@ -30,11 +30,13 @@ namespace CWSLib
 	int32_t EventDispatcher::init(std::function<void(std::shared_ptr<Socket>)> func)
 	{
 		acceptor.Init();
+		acceptor.SetNonblocking();
 		acceptor.Bind("127.0.0.1", 9091);
 		container.Init(acceptor.GetFd());
 		container.OnListen([&]() {
 			std::shared_ptr<Socket> sock = acceptor.Accept();
-			sock->SetNonblocking();
+			if(sock.get())
+				sock->SetNonblocking();
 			return sock;
 		});
 		container.OnRead([func](std::shared_ptr<Socket> sock) {

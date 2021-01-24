@@ -44,13 +44,12 @@ namespace CWSLib {
 				for (; ; )
 				{
 					std::shared_ptr<Socket> sock = m_listenFunc();
+					if (!sock.get())
+					{
+						break;
+					}
 					int connFd = sock->GetFd();
 					m_sockMap.insert(std::make_pair(connFd, sock));
-					if (connFd < 0)
-					{
-						ERROR_LOG("Accept new socket failed");
-						return -1;
-					}
 					epoll_event registEvent;
 					registEvent.data.fd = connFd; // 设置用于读操作的文件描述符
 					registEvent.events = EPOLLIN | EPOLLET; // 设置用于注册的读操作事件

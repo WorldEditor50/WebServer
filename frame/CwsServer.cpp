@@ -44,6 +44,12 @@ namespace CwsFrame
         thdPool.init(5, 100, 20);
         dispatcher.init([&](std::shared_ptr<CWSLib::Socket> sock) {
             auto job = CJobFactory::instance().create();
+            if (!job)
+            {
+                ERROR_LOG("CJobFactory get instance failed.");
+                sock->Close();
+                abort();
+            }
             job->Init(sock);
             thdPool.addTask(job);
         });
