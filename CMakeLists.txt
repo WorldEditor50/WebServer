@@ -9,7 +9,7 @@ if(NOT SET_MY_CLIENT_NAME)
 endif()
 
 project (${SET_MY_SERVER_NAME} VERSION 0.1.0 LANGUAGES CXX)
-add_compile_options(-std=c++11)
+add_compile_options(-std=c++11 -g)
 
 LIST(APPEND SRC_DIR commlib frame)
 foreach(cur_dir ${SRC_DIR})
@@ -66,6 +66,7 @@ target_include_directories(cws_business
 )
 target_link_libraries(cws_business
 	PUBLIC cws_frame
+	PRIVATE ${PROTOBUF_LIBRARY}
 )
 
 target_include_directories(${SET_MY_SERVER_NAME}

@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "frame/CwsServer.h"
+#include "src/proj_comm/ProJobImpl.h"
 
 int main(int argc, char** argv)
 {

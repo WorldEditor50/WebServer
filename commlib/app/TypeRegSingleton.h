@@ -93,6 +93,7 @@ private:\
 \
 public:\
 	static void AddFunction() {\
+		NORMAL_LOG("Adding " #__cb_func); \
 		CWSLib::CommSingleton<TypeFactory<BaseType>>::instance()->join(#__cb_func, getInstance, is_default);\
 		m_meta.DoNothing();\
 	} \

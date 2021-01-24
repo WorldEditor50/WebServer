@@ -84,6 +84,3 @@ void ProJobImpl::Response()
 }
 
 REG_TYPE(CwsFrame::JobImpl, ProJobImpl, pro_job_impl, true);
-//static CwsFrame::JobMeta meta("ProJobImpl", []() {
-//		return new ProJobImpl;
-//	}, true);
