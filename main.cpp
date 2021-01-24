@@ -6,7 +6,7 @@
 
 int main(int argc, char** argv)
 {
-	CwsFrame::Server& server = CServerSingleton::instance();
+	CwsFrame::Server& server = *CServerSingleton::instance();
 	server.Run();
 	return 0;
 }

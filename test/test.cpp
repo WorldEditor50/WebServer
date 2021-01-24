@@ -19,7 +19,7 @@ void CWSTest::helloWorld()
 	std::cout << "Hello world!\n";
 }
 
-REG_TYPE_DEFAULT(CWSLib::BaseJob, TestTask, test_task);
+REG_TYPE(CWSLib::BaseJob, TestTask, test_task, false);
 
 void CWSTest::threadPool()
 {

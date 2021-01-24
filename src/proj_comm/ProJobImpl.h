@@ -14,10 +14,10 @@ public:
 	ProJobImpl() {}
 	~ProJobImpl() {}
 
-	void execute() override;
+	int32_t execute() override;
 
 private:
-	void ParseInputContent();
+	int32_t ParseInputContent();
 	void CallMethod();
 	void Response();
 

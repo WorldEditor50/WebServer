@@ -44,9 +44,9 @@ namespace CWSLib
 
 typedef CWSLib::CommSingleton<CWSLib::Logger> CWSLogger;
 
-#define BASIC_LOG(level, fmt, ...) do{ CWSLogger::instance().log(\
+#define BASIC_LOG(level, fmt, ...) do{ CWSLogger::instance()->log(\
     level, std::move(CWSLib::String::format(fmt, ##__VA_ARGS__))); }while(0)
-#define SET_LOG_FILE(fileName) do { CWSLogger::instance().setFile(fileName); } while(0)
+#define SET_LOG_FILE(fileName) do { CWSLogger::instance()->setFile(fileName); } while(0)
 
 #endif // !__LOGGER_H__
 

@@ -40,10 +40,11 @@ namespace CwsFrame
 
     void Server::Run()
     {
-        CWSLib::ThreadPool& thdPool = CWSLib::CommSingleton<CWSLib::ThreadPool>::instance();
+        NORMAL_LOG("[%u] services has been registed.", m_serviceMap.size());
+        CWSLib::ThreadPool& thdPool = *CWSLib::CommSingleton<CWSLib::ThreadPool>::instance();
         thdPool.init(5, 100, 20);
         dispatcher.init([&](std::shared_ptr<CWSLib::Socket> sock) {
-            auto job = CJobFactory::instance().create();
+            auto job = CJobFactory::instance()->create();
             if (!job)
             {
                 ERROR_LOG("CJobFactory get instance failed.");

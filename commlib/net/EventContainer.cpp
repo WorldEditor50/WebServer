@@ -6,6 +6,7 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #include <arpa/inet.h>
+#include <errno.h>
 #include <cstring>
 
 namespace CWSLib {
@@ -63,7 +64,6 @@ namespace CWSLib {
 			}
 			else if (events[i].events & EPOLLIN)
 			{
-				NORMAL_LOG("==X==");
 				// 如果是已经连接的用户，并且收到数据，那么进行读入。
 				auto itor = m_sockMap.find(events[i].data.fd);
 				if (itor == m_sockMap.end())
@@ -73,9 +73,10 @@ namespace CWSLib {
 				}
 				int ret = m_readFunc(itor->second);
 				NORMAL_LOG("==X==");
-				if (ret < 0)
+				if (ret < 0 && errno == ECONNRESET)
 				{
 					DEBUG_LOG("Read from [%d] failed.", events[i].data.fd);
+					m_sockMap.erase(events[i].data.fd);
 					events[i].data.fd = -1;
 				}
 				epoll_event registEvent;

@@ -9,7 +9,7 @@ namespace CWSLib
 	{
 	public:
 		virtual ~BaseJob() {};
-		virtual void execute() = 0;
+		virtual int32_t execute() = 0;
 	};
 }
 

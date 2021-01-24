@@ -31,7 +31,7 @@ namespace CwsFrame
 	public:
 		MethodRegMeta(const std::string& serviceName, const std::string& methodName)
 		{
-			CWSLib::CommSingleton<CwsFrame::Server>::instance().GetService(serviceName)->AddMethod(methodName, Instance);
+			CWSLib::CommSingleton<CwsFrame::Server>::instance()->GetService(serviceName)->AddMethod(methodName, Instance);
 		}
 
 		static std::shared_ptr<TMethod> Instance()

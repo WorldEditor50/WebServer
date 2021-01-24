@@ -42,7 +42,7 @@ namespace CWSTest
 	public:
 		RegClientMata()
 		{
-			CWSLib::CommSingleton<ClientQueue>::instance().Add(std::shared_ptr<ClientJobBase>(new ClientImpl));
+			CWSLib::CommSingleton<ClientQueue>::instance()->Add(std::shared_ptr<ClientJobBase>(new ClientImpl));
 		}
 	};
 }

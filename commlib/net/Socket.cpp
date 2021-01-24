@@ -182,7 +182,7 @@ namespace CWSLib
 			NI_NUMERICHOST | NI_NUMERICSERV);
 		if (!ret)
 		{
-			DEBUG_LOG("New connection: host = %s, port = %s\n", hostBuf, portBuf);
+			DEBUG_LOG("New connection: host = %s, port = %s", hostBuf, portBuf);
 		}
 		std::shared_ptr<Socket> newConn = std::shared_ptr<Socket>(new Socket(connFd));
 		newConn->SetNonblocking();

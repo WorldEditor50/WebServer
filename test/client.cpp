@@ -6,7 +6,7 @@
 
 int main()
 {
-	auto instance = CWSLib::CommSingleton<CWSTest::ClientQueue>::instance();
+	auto instance = *CWSLib::CommSingleton<CWSTest::ClientQueue>::instance();
 	instance.Exec();
 	CWSTest::ExecResult& result = instance.Result();
 	NORMAL_LOG("======== TEST RESULT ========");
