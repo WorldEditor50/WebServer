@@ -4,14 +4,17 @@
 #define __TYPE_REG_SINGLETON_H__
 
 #include <string>
+#include <functional>
 #include <map>
 #include "../basic/CommonSingleton.h"
 
+template<class BaseClass>
 class TypeRegContainer
 {
+	using CbFunc = std::function<BaseClass* ()>;
 	friend CWSLib::CommSingleton<TypeRegContainer>;
 public:
-	void* create(const std::string& className)
+	CbFunc create(const std::string& className)
 	{
 		auto iter = cbFuncMap.find(className);
 		if (iter != cbFuncMap.end())
@@ -20,11 +23,12 @@ public:
 		}
 		else
 		{
+			DEBUG_LOG("container size:[%u]", cbFuncMap.size());
 			return nullptr;
 		}
 	}
 
-	void join(const std::string& className, void* __cb)
+	void join(const std::string& className, CbFunc __cb)
 	{
 		cbFuncMap.insert(std::make_pair(className, __cb));
 	}
@@ -33,19 +37,19 @@ private:
 	TypeRegContainer() {}
 	TypeRegContainer(TypeRegContainer& alFac) {}
 
-	std::map<std::string, void*> cbFuncMap;
+	std::map<std::string, CbFunc> cbFuncMap;
 };
-typedef CWSLib::CommSingleton<TypeRegContainer> CTypeRegContainer;
 
 template<class BaseClass>
 class TypeFactory
 {
-	typedef BaseClass* (*CbFunc)();
+	using CbFunc = std::function<BaseClass*()>;
+	using CTypeRegContainer = CWSLib::CommSingleton<TypeRegContainer<BaseClass>>;
 	friend CWSLib::CommSingleton<TypeFactory>;
 public:
 	BaseClass* create(const std::string& className)
 	{
-		CbFunc funcPtr = (CbFunc)CTypeRegContainer::instance().create(className);
+		CbFunc funcPtr = CTypeRegContainer::instance()->create(className);
 		if (funcPtr == nullptr)
 		{
 			return nullptr;
@@ -53,47 +57,54 @@ public:
 		return funcPtr();
 	}
 
-	void join(const std::string& className, CbFunc __cb)
+	BaseClass* create()
 	{
-		CTypeRegContainer::instance().join(className, (void*)__cb);
+		return create(m_defaultTypeName);
+	}
+
+	void join(const std::string& className, CbFunc __cb, bool setDefault)
+	{
+		if (setDefault)
+		{
+			m_defaultTypeName = className;
+		}
+		CTypeRegContainer::instance()->join(className, __cb);
 	}
 
 private:
 	TypeFactory() {}
 	TypeFactory(TypeFactory& alFac) {}
+
+private:
+	std::string m_defaultTypeName;
 };
 
-template <typename T>
-T* SafeNew()
-{
-	T* ptr = nullptr;
-	try
-	{
-		ptr = new T;
-	}
-	catch (...)
-	{
-		///Do nothing for now ...
-	}
-	return ptr;
-}
+#define REG_TYPE(BaseType, TypeName, __cb_func, is_default) \
+class TypeRegCaller ## TypeName {\
+private:\
+	class Meta {\
+	public:\
+		Meta() {\
+			TypeRegCaller ## TypeName::AddFunction();\
+		}\
+		void DoNothing() {}\
+	};\
+	static Meta m_meta;\
+\
+public:\
+	static void AddFunction() {\
+		NORMAL_LOG("Adding " #__cb_func); \
+		CWSLib::CommSingleton<TypeFactory<BaseType>>::instance()->join(#__cb_func, getInstance, is_default);\
+		m_meta.DoNothing();\
+	} \
+	static BaseType* getInstance() {\
+		return new TypeName;\
+	}\
+};\
+TypeRegCaller ## TypeName::Meta TypeRegCaller ## TypeName::m_meta
 
-template<class BaseClass>
-class TypeRegCaller
-{
-public:
-	TypeRegCaller(const std::string& className)
-	{
-		CWSLib::CommSingleton<TypeFactory<BaseClass>>::instance().join(className, getInstance);
-	}
-
-	static BaseClass* getInstance()
-	{
-		return SafeNew<BaseClass>();
-	}
-};
-
-#define REG_TYPE(TypeName, __cb_func) static TypeRegCaller<TypeName> caller_##__cb_func(#__cb_func)
+//#define REG_TYPE(BaseType, TypeName, __cb_func) static TypeRegCaller<BaseType, TypeName> caller_##__cb_func(#__cb_func)
+//#define REG_TYPE_DEFAULT(BaseType, TypeName, __cb_func) static TypeRegCaller<BaseType, TypeName> caller_##__cb_func(#__cb_func, true)
 
 #endif // !__TYPE_REG_SINGLETON_H__
 

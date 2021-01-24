@@ -2,31 +2,13 @@
 
 #include <iostream>
 
-#include "test/test.h"
-#include "frame/Server.h"
-
-#ifdef CLIENT_MAIN
+#include "frame/CwsServer.h"
+#include "src/proj_comm/ProJobImpl.h"
 
 int main(int argc, char** argv)
 {
-	//CWSTest::helloWorld();
-	//CWSTest::threadPool();
-	//CWSTest::log();
-	CWSTest::client();
+	CwsFrame::Server& server = *CServerSingleton::instance();
+	server.Run();
 	return 0;
 }
 
-#else
-
-int main(int argc, char** argv)
-{
-	//CWSTest::helloWorld();
-	//CWSTest::threadPool();
-	//CWSTest::log();
-	//CWSTest::json();
-	CWSLib::Server server;
-	server.run();
-	return 0;
-}
-
-#endif // CLIENT_MAIN

@@ -94,7 +94,7 @@ void CWSLib::ThreadPool::work()
 		{
 			mPushCond.notify_one();
 		}
-		task->excute();
+		task->execute();
 
 		// 根据实时的任务情况，适当减少当前运行的线程
 		if (mJobList.size() < mTaskLimit / 2 && mCurrentThdSize > mInitThdnum)

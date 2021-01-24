@@ -14,11 +14,12 @@
 class TestTask : public CWSLib::BaseJob
 {
 public:
-    virtual void excute()
+    virtual int32_t execute() override
     {
         srand((unsigned int)time(NULL));
         std::this_thread::sleep_for(std::chrono::milliseconds(rand() % 300));
         std::cout << std::this_thread::get_id() << ": Haha\n";
+        return 0;
     }
 
 private:

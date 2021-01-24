@@ -24,3 +24,9 @@ void CWSLib::String::split(std::vector<std::string>& strList, const std::string&
 	}
 	strList.push_back(src.substr(pos));
 }
+
+std::string CWSLib::String::baseName(const std::string& fileName)
+{
+	auto pos = fileName.rfind('/');
+	return fileName.substr(pos + 1);
+}
