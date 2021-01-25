@@ -38,15 +38,15 @@ void CWSLib::ThreadPool::addTask(BaseJob* task)
 		mJobList.addTask(task);
 		mWakeCond.notify_one();
 	}
-	else if (mCurrentThdSize < mThreadLimit)
+	/*else if (mCurrentThdSize < mThreadLimit)
 	{
+		mJobList.addTask(task);
+		mWakeCond.notify_one();
 		std::thread thd([&]() {
 			this->work();
 			});
 		thd.detach();
-		mJobList.addTask(task);
-		mWakeCond.notify_one();
-	}
+	}*/
 	else
 	{
 		mPushCond.wait(ulock, [&]() {

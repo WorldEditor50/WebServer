@@ -1,5 +1,7 @@
 
 
+#include <thread>
+
 #include "commlib/app/TypeRegSingleton.h"
 #include "commlib/app/MacroAssemble.h"
 #include "commlib/basic/Exception.h"
@@ -25,6 +27,11 @@ int32_t ProJobImpl::execute()
 		ERROR_LOG("Caught exception[%d][%s].", exp.error(), exp.what());
 		return -1;
 	}
+	catch (std::exception& exp)
+	{
+		ERROR_LOG("Caught exception[%s].", exp.what());
+		return -1;
+	}
 	catch (...)
 	{
 		ERROR_LOG("Caught unknown error.");
@@ -35,12 +42,14 @@ int32_t ProJobImpl::execute()
 
 int32_t ProJobImpl::ParseInputContent()
 {
-	char buf[sizeof(size_t)];
-	m_sock->Read(buf, sizeof(size_t));
-	size_t contextLen = *(size_t*)buf;
+	char buf[sizeof(int32_t)] = {0};
+	m_sock->Read(buf, sizeof(int32_t));
+	int32_t contextLen = *(int32_t*)buf;
+	NORMAL_LOG("Context len[%d][%u]", contextLen, std::this_thread::get_id());
 	std::string contextBuf;
 	int readLen = m_sock->Read(contextBuf, contextLen);
-	if (readLen < 0)
+	NORMAL_LOG("Read from socket[%d][%u]", readLen, std::this_thread::get_id());
+	if (readLen <= 0)
 	{
 		return -1;
 	}
@@ -78,9 +87,9 @@ void ProJobImpl::Response()
 	std::string output;
 	std::string respStr = response->SerializeAsString();
 	size_t length = respStr.length();
-	output += (char*)&length;
+	output.insert(0, (char*)&length, sizeof(int32_t));
 	output += respStr;
 	m_sock->WriteAll(output);
 }
 
-REG_TYPE(CwsFrame::JobImpl, ProJobImpl, pro_job_impl, true);
+//REG_TYPE(CwsFrame::JobImpl, ProJobImpl, pro_job_impl, true);

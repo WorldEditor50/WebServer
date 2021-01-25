@@ -10,7 +10,7 @@ namespace CwsFrame
 {
     int32_t Server::AddService(const std::string& serviceName, Service* servicePtr)
     {
-        if (m_serviceMap.find(serviceName) != m_serviceMap.end())
+        if (m_serviceMap.find(serviceName) == m_serviceMap.end())
         {
             NORMAL_LOG("Adding service[%s]", serviceName.c_str());
             m_serviceMap.insert(std::make_pair(serviceName, std::shared_ptr<Service>(servicePtr)));
@@ -42,7 +42,7 @@ namespace CwsFrame
     {
         NORMAL_LOG("[%u] services has been registed.", m_serviceMap.size());
         CWSLib::ThreadPool& thdPool = *CWSLib::CommSingleton<CWSLib::ThreadPool>::instance();
-        thdPool.init(5, 100, 20);
+        thdPool.init(1, 100, 1);
         dispatcher.init([&](std::shared_ptr<CWSLib::Socket> sock) {
             auto job = CJobFactory::instance()->create();
             if (!job)
