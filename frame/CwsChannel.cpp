@@ -15,12 +15,16 @@ namespace CwsFrame
 		google::protobuf::Message* response,
 		google::protobuf::Closure* done)
 	{
-		std::string requestData = request->SerializeAsString();
+		//std::string requestData = request->SerializeAsString();
+		std::string requestData;
+		request->SerializeToString(&requestData);
 		cws::common::RpcContext context;
 		context.set_service_name(method->service()->name());
 		context.set_method_name(method->name());
 		context.set_content_length(requestData.length());
-		std::string ctxString = context.SerializeAsString();
+		//std::string ctxString = context.SerializeAsString();
+		std::string ctxString;
+		context.SerializeToString(&ctxString);
 		std::string content;
 		int32_t length = ctxString.length();
 		NORMAL_LOG("context length: %d", length);

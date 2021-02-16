@@ -38,7 +38,7 @@ void CWSLib::ThreadPool::addTask(BaseJob* task)
 		mJobList.addTask(task);
 		mWakeCond.notify_one();
 	}
-	/*else if (mCurrentThdSize < mThreadLimit)
+	else if (mCurrentThdSize < mThreadLimit)
 	{
 		mJobList.addTask(task);
 		mWakeCond.notify_one();
@@ -46,7 +46,7 @@ void CWSLib::ThreadPool::addTask(BaseJob* task)
 			this->work();
 			});
 		thd.detach();
-	}*/
+	}
 	else
 	{
 		mPushCond.wait(ulock, [&]() {
@@ -94,7 +94,7 @@ void CWSLib::ThreadPool::work()
 		{
 			mPushCond.notify_one();
 		}
-		task->execute();
+		task->Execute();
 
 		// 根据实时的任务情况，适当减少当前运行的线程
 		if (mJobList.size() < mTaskLimit / 2 && mCurrentThdSize > mInitThdnum)

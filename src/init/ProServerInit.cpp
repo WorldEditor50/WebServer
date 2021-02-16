@@ -10,7 +10,7 @@
 int ServerInit()
 {
     // init jobs
-    auto& jobsFactory = *CwsFrame::CJobFactory::instance();
+    auto& jobsFactory = *CJobFactory::instance();
     jobsFactory.join("pro_job_impl", []() { return new ProJobImpl; }, true);
 
     // init services and methods

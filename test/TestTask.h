@@ -9,12 +9,22 @@
 #include <ctime>
 #include <cstdlib>
 
-#include "commlib/thread_pool/BaseJob.h"
+#include "commlib/net/BaseJob.h"
 
 class TestTask : public CWSLib::BaseJob
 {
 public:
-    virtual int32_t execute() override
+    void Init(std::shared_ptr<CWSLib::Socket> sock) override
+    {
+
+    }
+
+    int32_t ReadSock() override
+    {
+        return 0;
+    }
+
+    int32_t Execute() override
     {
         srand((unsigned int)time(NULL));
         std::this_thread::sleep_for(std::chrono::milliseconds(rand() % 300));

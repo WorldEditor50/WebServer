@@ -11,14 +11,37 @@
 #include "ProJobImpl.h"
 #include "ProError.h"
 
-int32_t ProJobImpl::execute()
+void ProJobImpl::Init(std::shared_ptr<CWSLib::Socket> sock)
+{
+	m_sock = sock;
+}
+
+int32_t ProJobImpl::ReadSock()
+{
+	char buf[sizeof(int32_t)] = { 0 };
+	int readLen = m_sock->Read(buf, sizeof(int32_t));
+	if (readLen <= 0)
+	{
+		return -1;
+	}
+	int32_t contextLen = *(int32_t*)buf;
+	NORMAL_LOG("Context len[%d][%u]", contextLen, std::this_thread::get_id());
+	std::string contextBuf;
+	readLen = m_sock->Read(contextBuf, contextLen);
+	NORMAL_LOG("Read from socket[%d][%u]", readLen, std::this_thread::get_id());
+	if (readLen <= 0)
+	{
+		return -1;
+	}
+	m_context.ParseFromString(contextBuf);
+	NORMAL_LOG("Service[%s], Method[%s].", m_context.service_name().c_str(), m_context.method_name().c_str());
+	return 0;
+}
+
+int32_t ProJobImpl::Execute()
 {
 	try
 	{
-		if (ParseInputContent() < 0)
-		{
-			return -1;
-		}
 		CallMethod();
 		Response();
 	}
@@ -37,27 +60,6 @@ int32_t ProJobImpl::execute()
 		ERROR_LOG("Caught unknown error.");
 		return -1;
 	}
-	return 0;
-}
-
-int32_t ProJobImpl::ParseInputContent()
-{
-	char buf[sizeof(int32_t)] = {0};
-	m_sock->Read(buf, sizeof(int32_t));
-	int32_t contextLen = *(int32_t*)buf;
-	NORMAL_LOG("Context len[%d][%u]", contextLen, std::this_thread::get_id());
-	std::string contextBuf;
-	int readLen = m_sock->Read(contextBuf, contextLen);
-	NORMAL_LOG("Read from socket[%d][%u]", readLen, std::this_thread::get_id());
-	if (readLen <= 0)
-	{
-		return -1;
-	}
-	if (!m_context.ParseFromString(contextBuf))
-	{
-		throw CWSLib::Exception(Error::PROTO_PARSE, "Context parse from string failed.");
-	}
-	NORMAL_LOG("Service[%s], Method[%s].", m_context.service_name().c_str(), m_context.method_name().c_str());
 	return 0;
 }
 

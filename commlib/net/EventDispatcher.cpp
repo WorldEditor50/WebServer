@@ -26,7 +26,7 @@ namespace CWSLib
 	{
 	}
 
-	int32_t EventDispatcher::init(std::function<void(std::shared_ptr<Socket>)> func)
+	int32_t EventDispatcher::init()
 	{
 		acceptor.Init();
 		acceptor.SetNonblocking();
@@ -37,10 +37,6 @@ namespace CWSLib
 			if(sock.get())
 				sock->SetNonblocking();
 			return sock;
-		});
-		container.OnRead([func](std::shared_ptr<Socket> sock) {
-			func(sock);
-			return 0;
 		});
 		return 0;
 	}
