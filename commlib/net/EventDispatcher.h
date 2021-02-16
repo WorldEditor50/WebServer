@@ -16,11 +16,9 @@ namespace CWSLib
 	{
 	public:
 		EventDispatcher();
-
 		~EventDispatcher();
 
-		int32_t init(std::function<void(std::shared_ptr<Socket>)> func);
-
+		int32_t init();
 		int32_t wait();
 
 	private:

@@ -4,13 +4,12 @@
 #include "commlib/thread_pool/ThreadPool.h"
 
 #include "CwsServer.h"
-#include "CwsJobImpl.h"
 
 namespace CwsFrame
 {
     int32_t Server::AddService(const std::string& serviceName, Service* servicePtr)
     {
-        if (m_serviceMap.find(serviceName) != m_serviceMap.end())
+        if (m_serviceMap.find(serviceName) == m_serviceMap.end())
         {
             NORMAL_LOG("Adding service[%s]", serviceName.c_str());
             m_serviceMap.insert(std::make_pair(serviceName, std::shared_ptr<Service>(servicePtr)));
@@ -42,18 +41,8 @@ namespace CwsFrame
     {
         NORMAL_LOG("[%u] services has been registed.", m_serviceMap.size());
         CWSLib::ThreadPool& thdPool = *CWSLib::CommSingleton<CWSLib::ThreadPool>::instance();
-        thdPool.init(5, 100, 20);
-        dispatcher.init([&](std::shared_ptr<CWSLib::Socket> sock) {
-            auto job = CJobFactory::instance()->create();
-            if (!job)
-            {
-                ERROR_LOG("CJobFactory get instance failed.");
-                sock->Close();
-                abort();
-            }
-            job->Init(sock);
-            thdPool.addTask(job);
-        });
+        thdPool.init(1, 100, 1);
+        dispatcher.init();
         NORMAL_LOG("Finish init server");
         dispatcher.wait();
     }

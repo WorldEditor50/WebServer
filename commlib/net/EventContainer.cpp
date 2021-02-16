@@ -2,6 +2,7 @@
 
 #include "EventContainer.h"
 #include "commlib/app/MacroAssemble.h"
+#include "BaseJob.h"
 
 #include <netinet/in.h>
 #include <netdb.h>
@@ -38,7 +39,6 @@ namespace CWSLib {
 		// 处理所发生的所有事件
 		for (int i = 0; i < fdNum; ++i)
 		{
-			NORMAL_LOG("==X==");
 			if (events[i].data.fd == m_listenFd)
 			{
 				// 由于采用了边缘触发模式，这里需要使用循环，保证所有新的连接都被注册
@@ -50,7 +50,10 @@ namespace CWSLib {
 						break;
 					}
 					int connFd = sock->GetFd();
-					m_sockMap.insert(std::make_pair(connFd, sock));
+					std::shared_ptr<SockCtx> ctx = std::make_shared<SockCtx>();
+					ctx->available = true;
+					ctx->sock = sock;
+					m_sockMap.insert(std::make_pair(connFd, ctx));
 					epoll_event registEvent;
 					registEvent.data.fd = connFd; // 设置用于读操作的文件描述符
 					registEvent.events = EPOLLIN | EPOLLET; // 设置用于注册的读操作事件
@@ -71,19 +74,28 @@ namespace CWSLib {
 					ERROR_LOG("fd [%d] not cached.", events[i].data.fd);
 					return -1;
 				}
-				int ret = m_readFunc(itor->second);
-				NORMAL_LOG("==X==");
-				if (ret < 0 && errno == ECONNRESET)
+				if (itor->second->available == false)
 				{
-					DEBUG_LOG("Read from [%d] failed.", events[i].data.fd);
+					continue;
+				}
+				itor->second->available = false;
+				//int ret = m_readFunc(itor->second);
+				auto job = CJobFactory::instance()->create();
+				job->Init(itor->second->sock);
+				int ret = job->ReadSock();
+				if (ret != 0)
+				{
+					itor->second->sock->Close();
 					m_sockMap.erase(events[i].data.fd);
 					events[i].data.fd = -1;
+					continue;
 				}
 				epoll_event registEvent;
 				registEvent.data.fd = events[i].data.fd; // 设置用于写操作的文件描述符
 				registEvent.events = EPOLLOUT | EPOLLET; // 设置用于注册的写操作事件
 				epoll_ctl(m_epfd, EPOLL_CTL_MOD, events[i].data.fd, &registEvent); // 修改sockFd上要处理的事件为EPOLLOUT
-				NORMAL_LOG("==X==");
+				job->Execute();
+				itor->second->available = true;
 			}
 			else if (events[i].events & EPOLLOUT) // 如果有数据发送
 			{
@@ -101,11 +113,6 @@ namespace CWSLib {
 	void EventContainer::OnListen(std::function<std::shared_ptr<Socket>()> func)
 	{
 		m_listenFunc = func;
-	}
-
-	void EventContainer::OnRead(std::function<int32_t(std::shared_ptr<Socket>)> func)
-	{
-		m_readFunc = func;
 	}
 
 }

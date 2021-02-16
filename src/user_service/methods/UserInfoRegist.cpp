@@ -35,5 +35,5 @@ std::shared_ptr<google::protobuf::Message> UserInfoRegist::GetResponse()
     return m_response;
 }
 
-REG_SRV_METHOD(UserInfoRegist, user_service, user_info_regist);
+//REG_SRV_METHOD(UserInfoRegist, user_service, user_info_regist);
 

@@ -9,7 +9,7 @@
 #include <mutex>
 #include <condition_variable>
 
-#include "BaseJob.h"
+#include "commlib/net/BaseJob.h"
 
 namespace CWSLib
 {
